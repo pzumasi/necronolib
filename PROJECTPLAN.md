@@ -40,11 +40,12 @@ JournalEntry (foundry-nativ)
 - [x] module.json (v14, CoC7 optional, socket), Entry-ES-Modul, Styles, lang/de+en
 - [x] Recherche-Doku `docs/recherche-bindery.md`
 
-### Phase 1 — Datenmodell & Cover-Prototyp
-- flags-Schema definieren (`flags.necronolib`), Defaults + Migration-Hook
-- Prozedurales Cover: CSS-Material-Layer (Leder/Lack/Pergament/Stoff), SVG-Prägung/Titel, Buchrücken
-- Cover-Designer **lite** (AppV2-Dialog): Material, Farbe, Titel, Schließen-Effekte → Live-Vorschau
-- Verifizierung: Cover wird im Journal-Sheet-Header als Vorschau gerendert
+### Phase 1 — Datenmodell & Cover-Prototyp ✅ (erledigt 20.09.2026)
+- [x] flags-Schema definieren (`flags.necronolib.book`), Defaults + Schema-Version 1
+- [x] Prozedurales Cover: CSS-Material-Layer (Leder/Lack/Pergament/Stoff), Titel-Effekte (Vergoldung/Prägung/Tinte), Buchrücken, Buchblock-Schnitt, Abnutzung, Schließen, prozedurale Runen für titellose Bücher
+- [x] Cover-Designer **lite** (AppV2): Material, Palette, Wear, Dicke, Schließen, Titel (Text/Font/Effekt/Position) → Live-Vorschau ohne Re-Render; Kontextmenü-Eintrag im Journal-Verzeichnis (GM-only)
+- [x] Verifizierung: 21 Node-Tests grün; visuelle QA über Handlebars-Preview-Harness (`tools/preview.mjs`) + Screenshot-Review — 3 gefundene Bugs (Wortumbruch, Ink-Kontrast auf dunklem Stoff, fehlende Runen) gefixt und re-verifiziert
+- [ ] Journal-Sheet-Header-Vorschau → mit Phase 2 (Reader-Aufschlag nutzt dasselbe Partial)
 
 ### Phase 2 — Reader (MVP-Kern)
 - Vollbild-Reader-AppV2: Doppelseite, Aufschlag-Animation, Blättern (Buttons + Pfeiltasten)

@@ -14,8 +14,17 @@ Bücher und Mythos-Tome in Foundry VTT gestalten und erleben:
 ## Status
 
 - [x] Recherche Bindery + CoC7-Buchdatenmodell (`docs/recherche-bindery.md`)
-- [ ] Projektplan (`PROJECTPLAN.md`)
-- [ ] v0.0.1 — Skeleton
+- [x] Projektplan (`PROJECTPLAN.md`)
+- [x] Phase 1 — Cover-Modell + prozedurale Covers + Atelier lite (21 Tests grün, visuell verifiziert)
+- [ ] Phase 2 — Reader (Doppelseite, Umblättern, Socket-Sync)
+- [ ] Phase 3 — CoC7-Brücke
+
+## Entwicklung
+
+```powershell
+npm test              # 21 Unit-Tests (node --test)
+node tools/preview.mjs # Cover-Matrix als HTML generieren (tools/preview.html)
+```
 
 ## Umgebung
 
