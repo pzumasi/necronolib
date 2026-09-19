@@ -1,0 +1,12 @@
+{
+  "name": "necronolib",
+  "private": true,
+  "type": "module",
+  "description": "Custom books & Mythos tomes for Foundry VTT (CoC7-focused Bindery alternative)",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs"
+  },
+  "devDependencies": {
+    "handlebars": "^4.7.9"
+  }
+}

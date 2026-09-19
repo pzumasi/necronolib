@@ -1,0 +1,24 @@
+{{!-- Necronolib — Cover-Partial (geschlossen Buch, Frontansicht). Nutzt coverVars-Werte aus dem Kontext (vars). --}}
+<div class="nl-book"
+     data-nl-book
+     data-material="{{cover.material}}"
+     data-wear="{{cover.wear}}"
+     data-clasp="{{cover.clasps}}"
+     data-thickness="{{cover.thickness}}"
+     style="{{vars}}">
+  <div class="nl-pages-edge"></div>
+  <div class="nl-spine-hinge"></div>
+  <div class="nl-wear"></div>
+  <div class="nl-sheen"></div>
+  {{#if cover.title.text}}
+  <div class="nl-title-wrap nl-pos-{{cover.title.position}}">
+    <span class="nl-title nl-font-{{cover.title.font}} nl-effect-{{cover.title.effect}}">{{cover.title.text}}</span>
+  </div>
+  {{else if runes}}
+  <div class="nl-title-wrap nl-pos-{{cover.title.position}}">
+    <span class="nl-runes" title="{{runesTitle}}">{{runes}}</span>
+  </div>
+  {{/if}}
+  <div class="nl-clasp nl-clasp-top"></div>
+  <div class="nl-clasp nl-clasp-bottom"></div>
+</div>

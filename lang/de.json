@@ -1,1 +1,95 @@
-{}
+{
+  "NECRONOLIB": {
+    "Atelier": {
+      "Title": "Necronolib — Buch-Atelier",
+      "Hint": "Vorschau: geschlossenes Buch. Änderungen wirken sofort; Speichern legt sie im Journal ab.",
+      "Save": "Speichern",
+      "Reset": "Zurücksetzen",
+      "Saved": "Cover für „{journal}“ gespeichert.",
+      "RunesHint": "Ohne Titel: prozedurale Runen"
+    },
+    "Field": {
+      "Material": "Material",
+      "Palette": "Farbpalette",
+      "Wear": "Abnutzung",
+      "Thickness": "Dicke",
+      "Clasps": "Schließen",
+      "Title": "Titel",
+      "TitlePlaceholder": "Titel auf dem Cover …",
+      "TitleFont": "Schrift",
+      "TitleEffect": "Effekt",
+      "TitlePosition": "Position"
+    },
+    "Option": {
+      "Material": {
+        "leather": "Leder",
+        "lacquer": "Lack",
+        "vellum": "Pergament",
+        "cloth": "Stoff"
+      },
+      "Wear": {
+        "none": "Neuwertig",
+        "light": "Leicht",
+        "medium": "Mittel",
+        "heavy": "Stark"
+      },
+      "Thickness": {
+        "slim": "Schmal (Tagebuch)",
+        "medium": "Mittel",
+        "tome": "Wälzer"
+      },
+      "Clasps": {
+        "none": "Ohne",
+        "brass": "Messing",
+        "iron": "Eisen"
+      },
+      "TitleFont": {
+        "serif": "Serif (klassisch)",
+        "sans": "Seriflos (nüchtern)",
+        "runes": "Runen (monospace)"
+      },
+      "TitleEffect": {
+        "gilt": "Vergoldung",
+        "emboss": "Prägung",
+        "ink": "Tinte"
+      },
+      "TitlePosition": {
+        "top": "Oben",
+        "center": "Mitte",
+        "bottom": "Unten"
+      },
+      "Palette": {
+        "leather": {
+          "oxblood": "Ochsenblut",
+          "black": "Schwarz",
+          "tan": "Hellbraun",
+          "forest": "Waldgrün"
+        },
+        "cloth": {
+          "navy": "Marineblau",
+          "wine": "Weinrot",
+          "olive": "Oliv",
+          "charcoal": "Anthrazit"
+        },
+        "lacquer": {
+          "crimson": "Karmesin",
+          "black": "Schwarz",
+          "indigo": "Indigo",
+          "jade": "Jade"
+        },
+        "vellum": {
+          "cream": "Creme",
+          "honey": "Honig",
+          "ivory": "Elfenbein",
+          "slate": "Schiefer"
+        }
+      }
+    },
+    "Context": {
+      "DesignCover": "Buch-Cover gestalten"
+    },
+    "Warn": {
+      "GmOnly": "Nur die Spielleitung kann das Atelier öffnen."
+    }
+  }
+}

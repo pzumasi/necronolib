@@ -1,0 +1,93 @@
+{{!-- Necronolib — Atelier lite (Cover-Designer) --}}
+<div class="nl-atelier">
+  <section class="nl-preview">
+    {{> "modules/necronolib/templates/partials/book.hbs" cover=cover vars=vars }}
+    <p class="nl-hint">{{localize "NECRONOLIB.Atelier.Hint"}}</p>
+  </section>
+
+  <form class="nl-controls flexcol">
+    <div class="nl-field">
+      <label>{{localize "NECRONOLIB.Field.Material"}}</label>
+      <select data-nl-field name="material" data-nl-rerender="1">
+        {{#each materialOptions as |opt|}}
+        <option value="{{opt.id}}" {{selected opt.id ../cover.material}}>{{opt.label}}</option>
+        {{/each}}
+      </select>
+    </div>
+
+    <div class="nl-field">
+      <label>{{localize "NECRONOLIB.Field.Palette"}}</label>
+      <select data-nl-field name="palette">
+        {{#each paletteOptions as |opt|}}
+        <option value="{{opt.id}}" {{selected opt.id ../cover.palette}}>{{opt.label}}</option>
+        {{/each}}
+      </select>
+    </div>
+
+    <div class="nl-field">
+      <label>{{localize "NECRONOLIB.Field.Wear"}}</label>
+      <select data-nl-field name="wear">
+        {{#each wearOptions as |opt|}}
+        <option value="{{opt.id}}" {{selected opt.id ../cover.wear}}>{{opt.label}}</option>
+        {{/each}}
+      </select>
+    </div>
+
+    <div class="nl-field">
+      <label>{{localize "NECRONOLIB.Field.Thickness"}}</label>
+      <select data-nl-field name="thickness">
+        {{#each thicknessOptions as |opt|}}
+        <option value="{{opt.id}}" {{selected opt.id ../cover.thickness}}>{{opt.label}}</option>
+        {{/each}}
+      </select>
+    </div>
+
+    <div class="nl-field">
+      <label>{{localize "NECRONOLIB.Field.Clasps"}}</label>
+      <select data-nl-field name="clasps">
+        {{#each claspOptions as |opt|}}
+        <option value="{{opt.id}}" {{selected opt.id ../cover.clasps}}>{{opt.label}}</option>
+        {{/each}}
+      </select>
+    </div>
+
+    <div class="nl-field">
+      <label>{{localize "NECRONOLIB.Field.Title"}}</label>
+      <input type="text" data-nl-field name="title.text" value="{{cover.title.text}}"
+             placeholder="{{localize 'NECRONOLIB.Field.TitlePlaceholder'}}" maxlength="120" />
+    </div>
+
+    <div class="nl-field-row">
+      <div class="nl-field">
+        <label>{{localize "NECRONOLIB.Field.TitleFont"}}</label>
+        <select data-nl-field name="title.font">
+          {{#each fontOptions as |opt|}}
+          <option value="{{opt.id}}" {{selected opt.id ../cover.title.font}}>{{opt.label}}</option>
+          {{/each}}
+        </select>
+      </div>
+      <div class="nl-field">
+        <label>{{localize "NECRONOLIB.Field.TitleEffect"}}</label>
+        <select data-nl-field name="title.effect">
+          {{#each effectOptions as |opt|}}
+          <option value="{{opt.id}}" {{selected opt.id ../cover.title.effect}}>{{opt.label}}</option>
+          {{/each}}
+        </select>
+      </div>
+    </div>
+
+    <div class="nl-field">
+      <label>{{localize "NECRONOLIB.Field.TitlePosition"}}</label>
+      <select data-nl-field name="title.position">
+        {{#each positionOptions as |opt|}}
+        <option value="{{opt.id}}" {{selected opt.id ../cover.title.position}}>{{opt.label}}</option>
+        {{/each}}
+      </select>
+    </div>
+
+    <div class="nl-buttons flexrow">
+      <button type="button" data-action="save"><i class="fa-solid fa-check"></i> {{localize "NECRONOLIB.Atelier.Save"}}</button>
+      <button type="button" data-action="reset"><i class="fa-solid fa-rotate-left"></i> {{localize "NECRONOLIB.Atelier.Reset"}}</button>
+    </div>
+  </form>
+</div>

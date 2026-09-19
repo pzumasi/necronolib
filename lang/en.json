@@ -1,1 +1,95 @@
-{}
+{
+  "NECRONOLIB": {
+    "Atelier": {
+      "Title": "Necronolib — Book Atelier",
+      "Hint": "Preview: closed book. Changes apply instantly; saving stores them on the journal.",
+      "Save": "Save",
+      "Reset": "Reset",
+      "Saved": "Cover saved for “{journal}”.",
+      "RunesHint": "Without a title: procedural runes"
+    },
+    "Field": {
+      "Material": "Material",
+      "Palette": "Palette",
+      "Wear": "Wear",
+      "Thickness": "Thickness",
+      "Clasps": "Clasps",
+      "Title": "Title",
+      "TitlePlaceholder": "Title on the cover…",
+      "TitleFont": "Font",
+      "TitleEffect": "Effect",
+      "TitlePosition": "Position"
+    },
+    "Option": {
+      "Material": {
+        "leather": "Leather",
+        "lacquer": "Lacquer",
+        "vellum": "Vellum",
+        "cloth": "Cloth"
+      },
+      "Wear": {
+        "none": "Pristine",
+        "light": "Light",
+        "medium": "Medium",
+        "heavy": "Heavy"
+      },
+      "Thickness": {
+        "slim": "Slim (journal)",
+        "medium": "Medium",
+        "tome": "Tome"
+      },
+      "Clasps": {
+        "none": "None",
+        "brass": "Brass",
+        "iron": "Iron"
+      },
+      "TitleFont": {
+        "serif": "Serif (classic)",
+        "sans": "Sans (plain)",
+        "runes": "Runes (monospace)"
+      },
+      "TitleEffect": {
+        "gilt": "Gilt",
+        "emboss": "Embossed",
+        "ink": "Ink"
+      },
+      "TitlePosition": {
+        "top": "Top",
+        "center": "Center",
+        "bottom": "Bottom"
+      },
+      "Palette": {
+        "leather": {
+          "oxblood": "Oxblood",
+          "black": "Black",
+          "tan": "Tan",
+          "forest": "Forest"
+        },
+        "cloth": {
+          "navy": "Navy",
+          "wine": "Wine",
+          "olive": "Olive",
+          "charcoal": "Charcoal"
+        },
+        "lacquer": {
+          "crimson": "Crimson",
+          "black": "Black",
+          "indigo": "Indigo",
+          "jade": "Jade"
+        },
+        "vellum": {
+          "cream": "Cream",
+          "honey": "Honey",
+          "ivory": "Ivory",
+          "slate": "Slate"
+        }
+      }
+    },
+    "Context": {
+      "DesignCover": "Design book cover"
+    },
+    "Warn": {
+      "GmOnly": "Only the GM can open the atelier."
+    }
+  }
+}
