@@ -16,8 +16,19 @@ Bücher und Mythos-Tome in Foundry VTT gestalten und erleben:
 - [x] Recherche Bindery + CoC7-Buchdatenmodell (`docs/recherche-bindery.md`)
 - [x] Projektplan (`PROJECTPLAN.md`)
 - [x] Phase 1 — Cover-Modell + prozedurale Covers + Atelier lite (21 Tests grün, visuell verifiziert)
-- [ ] Phase 2 — Reader (Doppelseite, Umblättern, Socket-Sync)
-- [ ] Phase 3 — CoC7-Brücke
+- [x] Phase 2 — Reader (geschlossenes Buch, Doppelseiten, Folios, Socket-Vorlesen)
+- [x] Phase 3 — CoC7-Brücke (Link, Chips, Erstlesung/Nachschlagen)
+- [x] v0.1.0 Release (38 Tests grün) — [Releases](https://github.com/pzumasi/necronolib/releases)
+- [ ] Foundry-Host-Spike (Installation + Testwelt)
+
+## Installation (testbereit)
+
+Release-Zip `necronolib.zip` von der [Release-Seite](https://github.com/pzumasi/necronolib/releases/latest)
+nach `<FoundryData>/Data/modules/necronolib/` entpacken (Ordnername exakt `necronolib`),
+Foundry komplett neu starten, Modul in der Welt aktivieren.
+
+- Ohne CoC7: Cover + Reader funktionieren systemagnostisch
+- Mit CoC7: zusätzlich Verknüpfungs-Dropdown (Atelier) + Statistik/Aktionen im Reader
 
 ## Entwicklung
 

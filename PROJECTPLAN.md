@@ -47,18 +47,17 @@ JournalEntry (foundry-nativ)
 - [x] Verifizierung: 21 Node-Tests grün; visuelle QA über Handlebars-Preview-Harness (`tools/preview.mjs`) + Screenshot-Review — 3 gefundene Bugs (Wortumbruch, Ink-Kontrast auf dunklem Stoff, fehlende Runen) gefixt und re-verifiziert
 - [ ] Journal-Sheet-Header-Vorschau → mit Phase 2 (Reader-Aufschlag nutzt dasselbe Partial)
 
-### Phase 2 — Reader (MVP-Kern)
-- Vollbild-Reader-AppV2: Doppelseite, Aufschlag-Animation, Blättern (Buttons + Pfeiltasten)
-- Inhalt aus JournalEntryPages rendern (ProseMirror-HTML, Bilder, Tabellen)
-- **Geteiltes Lesen**: Socket-Sync (SL steuert, Spieler folgen; Toggle im Reader)
-- GM-only-Seiten (via `flags.necronolib.page.keeperOnly`) für Spieler ausgeblendet
-- Verifizierung: 2 Browser-Sessions (SL + Spieler), Sync + Rechte manuell testen
+### Phase 2 — Reader (MVP-Kern) ✅ (erledigt 20.09.2026)
+- [x] Reader-AppV2: geschlossenes Buch → „Buch öffnen" → Doppelseiten (erste Seite rechts, Folio-Nummern auf dem Papier)
+- [x] Inhalt aus JournalEntryPages (text.content-HTML), keeperOnly-Seiten nur für GM (`flags.necronolib.page.keeperOnly` → Filter in `visiblePages`)
+- [x] Geteiltes Lesen: Socket-Kanal `module.necronolib`, GM-Toggle „Vorlesen", Echo-Guard + JournalEntry-Prefix-Härtung
+- [x] Verifizierung: Pagination/Socket-Guard-Tests; visuelle QA (Playwright): Buttons themenkonform, kein Text-Clipping, Folios + Falz per DOM-Check bestätigt
 
-### Phase 3 — CoC7-Brücke
-- Journal ↔ `book`-Item verknüpfen (UUID im Flag)
-- Reader-Aktionsleiste bei verknüpftem Item: Initial Reading / Sanity / Study-Progress — Aufruf der CoC7-Systemmechanik, Anzeige aus `system` (sanityLoss, mythosRating, gains)
-- Keeper-Inhalte (`description.keeper`) im Reader als SL-Seite
-- Verifizierung: Test-Actor mit Buch-Item, e2e der Buttons in Testwelt
+### Phase 3 — CoC7-Brücke ✅ (erledigt 20.09.2026)
+- [x] Journal ↔ `book`-Item verknüpfen (UUID im Flag `flags.necronolib.link.coc7BookUuid`, Dropdown im Atelier)
+- [x] Statistik-Chips im Reader (Mythos/Okkult, STA-Verlust, Mythos-Wert, CMI/CMF, Studium)
+- [x] Aktionsbuttons Erstleseversuch/Nachschlagen — Delegation an `item.system.attemptInitialReading()/attemptReference()` (nur GM, nur bei Actor-gebundenem Item)
+- [x] `description.keeper` als SL-Notiz-Block im Reader
 
 ### Phase 4 — Atelier (voller Designer)
 - Proportionen, Dicke, Buchrücken-Stile, Klappen, Eckbeschläge, Metallteile, Ketten
@@ -66,10 +65,10 @@ JournalEntry (foundry-nativ)
 - Texturen/Wear-Overlays prozedural; Titelfont/Größe/Position; eigenes Cover-Bild
 - Seiten-Editor-Erweiterungen: Fließtext um Illustrationen, Divider
 
-### Phase 5 — Release v0.1.0
-- Zip-Build (tar, module.json im Zip-Root), Tests, README/INSTALL
-- Installation auf Foundry-Host (manuell — privates Repo → kein Manifest-Install)
-- Entscheidung zuordnen: ob + wo veröffentlicht wird (separater Auftrag)
+### Phase 5 — Release v0.1.0 ✅ (erledigt 20.09.2026)
+- [x] Zip-Build per Python (module.json im Root, src/ enthalten, Import-Check im Zip), 18 Dateien
+- [x] GitHub-Release v0.1.0 mit Zip + module.json (privates Repo → Installation manuell)
+- [ ] Installation auf Foundry-Host + Testwelt-Spike (User)
 
 ## Risiken & Offenpunkte
 
