@@ -85,6 +85,19 @@
       </select>
     </div>
 
+    {{#if coc7Active}}
+    <div class="nl-field">
+      <label>{{localize "NECRONOLIB.Field.Coc7Link"}}</label>
+      <select data-nl-field name="coc7BookUuid">
+        <option value="" {{#unless link.coc7BookUuid}}selected{{/unless}}>{{localize "NECRONOLIB.Field.Coc7None"}}</option>
+        {{#each coc7Books as |book|}}
+        <option value="{{book.uuid}}" {{#if book.selected}}selected{{/if}}>{{book.name}}</option>
+        {{/each}}
+      </select>
+      <p class="nl-field-hint">{{localize "NECRONOLIB.Field.Coc7Hint"}}</p>
+    </div>
+    {{/if}}
+
     <div class="nl-buttons flexrow">
       <button type="button" data-action="save"><i class="fa-solid fa-check"></i> {{localize "NECRONOLIB.Atelier.Save"}}</button>
       <button type="button" data-action="reset"><i class="fa-solid fa-rotate-left"></i> {{localize "NECRONOLIB.Atelier.Reset"}}</button>

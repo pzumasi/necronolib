@@ -1,0 +1,977 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Necronolib — Reader-Preview</title>
+<style>
+  :root { color-scheme: dark; }
+  body { margin: 0; background: #14100c; color: #d8cfc0; font-family: 'Segoe UI', system-ui, sans-serif; padding: 24px; }
+  h1 { font-size: 1rem; letter-spacing: 0.25em; text-transform: uppercase; opacity: 0.7; text-align: center; }
+  .rp-card { max-width: 1040px; margin: 0 auto 36px; }
+  .rp-card h2 { font-size: 0.85rem; opacity: 0.75; letter-spacing: 0.08em; margin: 0 0 8px; }
+  .rp-frame { border: 1px solid rgba(185,143,47,.25); border-radius: 8px; padding: 12px; background: #201a14; display: flex; min-height: 560px; }
+  .rp-frame section.nl-reader { flex: 1; }
+  .rp-frame .nl-stage { min-height: 420px; }
+/* Necronolib — prozedurale Buchcovers (CSS-Layer, keine Assets).
+   Farben/Maße aus CSS-Vars (src/cover/model.mjs coverVars). */
+
+/* ---------- Geschlossenes Buch (Frontansicht) ---------- */
+
+.nl-book {
+  position: relative;
+  width: 220px;
+  height: 300px;
+  border-radius: 3px 6px 6px 3px;
+  background: linear-gradient(160deg, var(--nlc-light) 0%, var(--nlc-base) 38%, var(--nlc-dark) 100%);
+  box-shadow:
+    0 14px 28px rgba(0, 0, 0, 0.55),
+    0 3px 8px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+/* Material-Textur */
+.nl-book::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.nl-book[data-material='leather']::before {
+  background-image:
+    repeating-linear-gradient(107deg, rgba(0, 0, 0, 0.045) 0 2px, transparent 2px 7px),
+    repeating-linear-gradient(13deg, rgba(255, 255, 255, 0.02) 0 3px, transparent 3px 9px);
+}
+
+.nl-book[data-material='cloth']::before {
+  background-image:
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.07) 0 1px, transparent 1px 4px),
+    repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.07) 0 1px, transparent 1px 4px);
+}
+
+.nl-book[data-material='lacquer']::before {
+  background-image: radial-gradient(120% 70% at 30% 18%, rgba(255, 255, 255, 0.16), transparent 55%);
+}
+
+.nl-book[data-material='vellum']::before {
+  background-image:
+    radial-gradient(80% 40% at 70% 12%, rgba(150, 130, 90, 0.10), transparent 60%),
+    radial-gradient(60% 30% at 20% 88%, rgba(150, 130, 90, 0.08), transparent 60%);
+}
+
+/* Buchrücken-Scharnier (links) */
+.nl-spine-hinge {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: calc(var(--nl-spine-w) * 0.55);
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0.32) 45%, rgba(0, 0, 0, 0.06) 100%);
+  border-right: 1px solid rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+}
+
+/* Buchblock-Schnittfläche (rechts) */
+.nl-pages-edge {
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  right: 0;
+  width: var(--nl-pages-w);
+  background: repeating-linear-gradient(180deg, #cfc4a6 0 2px, #b8ac8c 2px 3px, #d8ceb2 3px 5px);
+  border-left: 1px solid rgba(0, 0, 0, 0.45);
+  box-shadow: inset -2px 0 4px rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+}
+
+/* Abnutzung */
+.nl-wear {
+  position: absolute;
+  inset: 0;
+  opacity: var(--nl-wear-o);
+  background-image:
+    radial-gradient(9% 2% at 22% 81%, rgba(255, 255, 255, 0.35), transparent 100%),
+    radial-gradient(14% 1.6% at 64% 24%, rgba(0, 0, 0, 0.4), transparent 100%),
+    radial-gradient(6% 1.4% at 81% 62%, rgba(255, 255, 255, 0.28), transparent 100%),
+    radial-gradient(5% 5% at 8% 14%, rgba(0, 0, 0, 0.5), transparent 100%),
+    linear-gradient(200deg, rgba(0, 0, 0, 0.16) 0%, transparent 30%, rgba(0, 0, 0, 0.2) 96%);
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+/* Glanz — nur Lack bekommt den ausgeprägten Diagonal-Streifen */
+.nl-sheen {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.04) 46%, rgba(255, 255, 255, 0.01) 55%, transparent 70%);
+  pointer-events: none;
+}
+
+.nl-book[data-material='leather'] .nl-sheen {
+  background: linear-gradient(115deg, transparent 34%, rgba(255, 255, 255, 0.05) 48%, transparent 62%);
+}
+
+.nl-book[data-material='lacquer'] .nl-sheen {
+  background: linear-gradient(115deg, transparent 26%, rgba(255, 255, 255, 0.28) 44%, rgba(255, 255, 255, 0.06) 54%, transparent 72%);
+}
+
+/* ---------- Titel ---------- */
+
+.nl-title-wrap {
+  position: absolute;
+  left: calc(var(--nl-spine-w) * 0.55 + 6%);
+  right: calc(var(--nl-pages-w) + 8%);
+  display: flex;
+  justify-content: center;
+  text-align: center;
+  pointer-events: none;
+}
+
+.nl-pos-top { top: 9%; }
+.nl-pos-center { top: 50%; translate: 0 -50%; }
+.nl-pos-bottom { bottom: 10%; }
+
+.nl-title {
+  font-size: var(--nl-title-size, 1.35rem);
+  line-height: 1.25;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  word-break: normal;
+  overflow-wrap: normal;
+  hyphens: none;
+  max-width: 100%;
+}
+
+/* Titel-lose Bücher: prozedurale Runen */
+.nl-runes {
+  font-size: 1.15rem;
+  letter-spacing: 0.3em;
+  color: color-mix(in srgb, var(--nlc-light) 55%, #b8a878);
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
+  opacity: 0.85;
+}
+
+.nl-font-serif { font-family: Georgia, 'Times New Roman', serif; }
+.nl-font-sans { font-family: 'Segoe UI', system-ui, sans-serif; letter-spacing: 0.12em; }
+.nl-font-runes { font-family: 'Cascadia Mono', Consolas, monospace; letter-spacing: 0.22em; }
+
+.nl-effect-gilt {
+  background: linear-gradient(175deg, #f5e29a 0%, #d4af37 40%, #a67c1a 60%, #f0d98c 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.65));
+}
+
+.nl-effect-emboss {
+  color: color-mix(in srgb, var(--nlc-base) 82%, black);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.14), 0 -1px 1px rgba(0, 0, 0, 0.55);
+}
+
+/* Tinte: dunkel auf hellen, hell auf dunklen Materialien lesbar */
+.nl-effect-ink {
+  color: color-mix(in srgb, var(--nlc-base) 30%, #0d0a07);
+  text-shadow: 0 0 1px rgba(13, 10, 7, 0.5);
+}
+
+.nl-book[data-material='leather'] .nl-effect-ink,
+.nl-book[data-material='cloth'] .nl-effect-ink,
+.nl-book[data-material='lacquer'] .nl-effect-ink {
+  color: #e8dfc8;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7), 0 0 6px rgba(0, 0, 0, 0.3);
+}
+
+.nl-book[data-material='vellum'] .nl-effect-emboss {
+  color: color-mix(in srgb, var(--nlc-base) 60%, #3a2f1d);
+}
+
+/* ---------- Schließen (Clasps) ---------- */
+
+.nl-clasp {
+  position: absolute;
+  right: calc(var(--nl-pages-w) * 0.5 - 10px);
+  width: 26px;
+  height: 13px;
+  border-radius: 3px;
+  display: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  pointer-events: none;
+}
+
+.nl-book[data-clasp='brass'] .nl-clasp,
+.nl-book[data-clasp='iron'] .nl-clasp { display: block; }
+
+.nl-book[data-clasp='brass'] .nl-clasp {
+  background: linear-gradient(180deg, #e8c977 0%, #b98f2f 55%, #8a651c 100%);
+}
+
+.nl-book[data-clasp='iron'] .nl-clasp {
+  background: linear-gradient(180deg, #9aa0a6 0%, #5c6166 55%, #3b3f43 100%);
+}
+
+.nl-clasp::after {
+  content: '';
+  position: absolute;
+  inset: 3px 9px;
+  border-radius: 2px;
+  background: rgba(0, 0, 0, 0.4);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+.nl-clasp-top { top: 14%; rotate: -8deg; }
+.nl-clasp-bottom { bottom: 14%; rotate: -8deg; }
+
+/* ==========================================================================
+   Reader
+   ========================================================================== */
+
+.nl-reader {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  height: 100%;
+  min-height: 0;
+}
+
+.nl-spread {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nl-spread-cover {
+  flex-direction: column;
+  gap: 16px;
+}
+
+.nl-spread-cover .nl-book { width: 260px; height: 360px; }
+
+.nl-open-hint {
+  font-size: 0.8rem;
+  opacity: 0.7;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Doppelseite */
+.nl-spread-pages {
+  gap: 0;
+  align-items: stretch;
+}
+
+.nl-page {
+  flex: 1 1 50%;
+  min-width: 0;
+  background:
+    linear-gradient(105deg, #efe6d0 0%, #f6efdd 50%, #e9dec4 100%);
+  padding: 26px 30px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  position: relative;
+}
+
+.nl-page-left {
+  border-radius: 4px 0 0 4px;
+  box-shadow: inset -14px 0 22px -14px rgba(90, 70, 40, 0.45), inset 2px 0 3px rgba(255, 255, 255, 0.4);
+}
+
+.nl-page-right {
+  border-radius: 0 4px 4px 0;
+  box-shadow: inset 14px 0 22px -14px rgba(90, 70, 40, 0.45), inset -2px 0 3px rgba(255, 255, 255, 0.4);
+}
+
+/* Falz in der Mitte */
+.nl-spread-pages::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 34px;
+  transform: translateX(-50%);
+  background: linear-gradient(90deg, rgba(90, 70, 40, 0.0) 0%, rgba(90, 70, 40, 0.22) 50%, rgba(90, 70, 40, 0.0) 100%);
+  pointer-events: none;
+}
+
+.nl-page-empty .nl-page-blank { flex: 1; }
+
+.nl-page-title {
+  margin: 0 0 12px;
+  font-size: 1.05rem;
+  color: #3a2c1a;
+  border-bottom: 1px solid rgba(90, 70, 40, 0.3);
+  padding-bottom: 6px;
+  font-family: Georgia, serif;
+}
+
+.nl-page-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  color: #2e2416;
+  font-family: Georgia, serif;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  padding-right: 8px;
+}
+
+.nl-page-body p { margin: 0 0 0.7em; }
+.nl-page-body img { max-width: 100%; height: auto; border-radius: 2px; }
+.nl-page-body h1, .nl-page-body h2, .nl-page-body h3 { color: #3a2c1a; }
+.nl-page-body table { border-collapse: collapse; }
+.nl-page-body td, .nl-page-body th { border: 1px solid rgba(90, 70, 40, 0.35); padding: 3px 7px; }
+
+/* Steuerleiste */
+.nl-reader-bar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 6px 4px 0;
+  border-top: 1px solid var(--color-border-dark-tertiary, rgba(80, 60, 40, 0.4));
+}
+
+.nl-bar-left, .nl-bar-right { display: flex; gap: 8px; align-items: center; flex: 1; }
+.nl-bar-right { justify-content: flex-end; }
+.nl-bar-center { display: flex; gap: 10px; align-items: center; }
+
+.nl-page-indicator {
+  font-size: 0.8rem;
+  opacity: 0.75;
+  min-width: 64px;
+  text-align: center;
+  letter-spacing: 0.06em;
+}
+
+.nl-coc7-badge {
+  font-size: 0.78rem;
+  padding: 3px 10px;
+  border: 1px solid var(--color-border-dark-tertiary, rgba(80, 60, 40, 0.4));
+  border-radius: 12px;
+  opacity: 0.9;
+  white-space: nowrap;
+}
+
+button.active {
+  box-shadow: 0 0 0 1px var(--color-border-highlight, #ff6400) inset;
+}
+
+/* ---------- Atelier-Layout ---------- */
+
+.nl-atelier {
+  display: flex;
+  gap: 18px;
+  padding: 8px 4px;
+  min-height: 0;
+  flex: 1;
+}
+
+.nl-atelier .nl-preview {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 22px 12px;
+  background: radial-gradient(90% 70% at 50% 20%, rgba(120, 110, 90, 0.10), transparent 70%);
+  border-radius: 6px;
+}
+
+.nl-atelier .nl-preview .nl-book {
+  width: 240px;
+  height: 330px;
+  flex: 0 0 auto;
+}
+
+.nl-atelier .nl-hint {
+  max-width: 260px;
+  margin: 0;
+  text-align: center;
+  font-size: 0.75rem;
+  opacity: 0.75;
+}
+
+.nl-atelier .nl-controls {
+  flex: 1;
+  min-width: 0;
+  gap: 8px;
+  padding-right: 6px;
+}
+
+.nl-field { display: flex; flex-direction: column; gap: 2px; }
+
+.nl-field label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.8;
+}
+
+.nl-field-row { display: flex; gap: 10px; }
+.nl-field-row .nl-field { flex: 1; }
+
+.nl-buttons { margin-top: auto; padding-top: 10px; gap: 8px; }
+
+/* ==========================================================================
+   Reader
+   ========================================================================== */
+
+.nl-reader {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex: 1;
+}
+
+/* CoC7-Leiste */
+.nl-coc7-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  border: 1px solid rgba(120, 100, 60, 0.35);
+  border-radius: 6px;
+  background: linear-gradient(180deg, rgba(40, 32, 22, 0.5), rgba(28, 22, 15, 0.5));
+}
+
+.nl-coc7-info { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; }
+.nl-coc7-meta { font-style: italic; opacity: 0.85; font-size: 0.85rem; }
+.nl-coc7-san { font-size: 0.9rem; }
+
+.nl-tag {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 2px 8px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+.nl-tag-mythos { color: #d8b46a; border-color: rgba(216, 180, 106, 0.5); background: rgba(216, 180, 106, 0.08); }
+.nl-tag-occult { color: #9fb8d8; border-color: rgba(159, 184, 216, 0.4); background: rgba(159, 184, 216, 0.08); }
+
+.nl-coc7-keeper-text {
+  width: 100%;
+  font-size: 0.85rem;
+  opacity: 0.9;
+  padding: 6px 8px;
+  border-left: 3px solid rgba(190, 60, 60, 0.6);
+  background: rgba(190, 60, 60, 0.08);
+}
+
+.nl-coc7-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* Lese-Fläche */
+.nl-reader-main { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+
+.nl-page-viewport {
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  gap: 0;
+  flex: 1;
+  min-height: 0;
+  padding: 4px 0 8px;
+}
+
+.nl-cover-view { align-items: center; }
+
+.nl-page {
+  position: relative;
+  flex: 1 1 50%;
+  max-width: 460px;
+  min-width: 0;
+  padding: 28px 34px 40px;
+  background:
+    linear-gradient(180deg, #efe6cf 0%, #e7dcc0 50%, #dfd2b1 100%);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+  overflow-y: auto;
+  color: #2a2013;
+}
+
+.nl-page[data-side='left'] {
+  border-radius: 4px 0 0 4px;
+  border-right: 1px solid rgba(120, 95, 55, 0.25);
+  background-image: linear-gradient(270deg, rgba(120, 95, 55, 0.12), transparent 8%);
+}
+
+.nl-page[data-side='right'] {
+  border-radius: 0 4px 4px 0;
+  border-left: 1px solid rgba(120, 95, 55, 0.25);
+  background-image: linear-gradient(90deg, rgba(120, 95, 55, 0.12), transparent 8%);
+}
+
+.nl-page-empty {
+  background: linear-gradient(180deg, #e9e0c8, #ddd0ae);
+  box-shadow: inset 0 0 24px rgba(90, 70, 40, 0.15);
+}
+
+.nl-page-title {
+  font-family: Georgia, serif;
+  font-size: 1.15rem;
+  margin: 0 0 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(90, 70, 40, 0.3);
+  letter-spacing: 0.04em;
+}
+
+.nl-page-body { font-family: Georgia, serif; font-size: 0.95rem; line-height: 1.55; }
+.nl-page-body p { margin: 0 0 0.7em; }
+.nl-page-body img { max-width: 100%; border-radius: 2px; }
+.nl-page-body .nl-page-image img { width: 100%; }
+
+.nl-page-num {
+  position: absolute;
+  bottom: 10px;
+  font-family: Georgia, serif;
+  font-size: 0.8rem;
+  opacity: 0.55;
+}
+.nl-page[data-side='left'] .nl-page-num { right: 14px; }
+.nl-page[data-side='right'] .nl-page-num { left: 14px; }
+
+/* Navigation */
+.nl-reader-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 8px 4px 2px;
+}
+
+.nl-reader-status { font-size: 0.85rem; opacity: 0.8; min-width: 120px; text-align: center; }
+
+.nl-btn {
+  cursor: pointer;
+  border: 1px solid rgba(150, 120, 70, 0.5);
+  background: linear-gradient(180deg, rgba(60, 48, 32, 0.6), rgba(42, 33, 22, 0.6));
+  color: #e4d5ae;
+  border-radius: 4px;
+  padding: 5px 12px;
+  font-size: 0.85rem;
+}
+.nl-btn:hover:not(:disabled) { background: linear-gradient(180deg, rgba(75, 60, 40, 0.7), rgba(52, 41, 27, 0.7)); }
+.nl-btn:disabled { opacity: 0.4; cursor: default; }
+.nl-btn-share { border-color: rgba(120, 150, 120, 0.5); color: #cfe0c8; }
+
+/* ==========================================================================
+   Necronolib — Reader (Phase 2/3)
+   Buch-Erlebnis: geschlossenes Cover, Aufschlag, Doppelseiten, Papier, CoC7.
+   ========================================================================== */
+
+.nl-reader {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex: 1;
+}
+
+/* Statusleiste */
+.nl-reader-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 6px 8px;
+  font-size: 0.8rem;
+}
+
+.nl-reader-title { font-weight: 600; letter-spacing: 0.04em; }
+.nl-reader-pages { opacity: 0.7; font-variant-numeric: tabular-nums; }
+.nl-spacer { flex: 1; }
+.nl-following { opacity: 0.7; }
+
+.nl-share-btn { font-size: 0.75rem; opacity: 0.85; }
+
+.nl-share-btn.active {
+  box-shadow: 0 0 0 1px #b98f2f, 0 0 8px rgba(185, 143, 47, 0.35);
+}
+
+/* Bühne */
+.nl-stage {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  padding: 4px 0 10px;
+  background:
+    radial-gradient(120% 90% at 50% 0%, rgba(60, 50, 36, 0.16), transparent 60%),
+    linear-gradient(180deg, rgba(24, 20, 16, 0.25), rgba(10, 9, 7, 0.4));
+  border-radius: 8px;
+}
+
+/* Geschlossenes Buch */
+.nl-closed {
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.nl-closed .nl-book { width: 260px; height: 355px; }
+
+.nl-open-btn {
+  font-size: 0.9rem;
+}
+
+.nl-open-hint {
+  margin: 0;
+  font-size: 0.75rem;
+  opacity: 0.6;
+  font-style: italic;
+}
+
+/* Doppelseite */
+.nl-spread {
+  display: flex;
+  align-self: center;
+  max-width: 100%;
+  max-height: 100%;
+  aspect-ratio: 3 / 2;
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.55);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+/* Einzelseite: Papier */
+.nl-page {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+  padding: 7% 7% 10%;
+  background:
+    linear-gradient(105deg, rgba(0, 0, 0, 0.10), transparent 12%),
+    linear-gradient(255deg, rgba(0, 0, 0, 0.08), transparent 12%),
+    linear-gradient(180deg, #ece3cc 0%, #e6dcc2 60%, #ddd1b2 100%);
+  color: #26211a;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 0.98rem;
+  line-height: 1.55;
+}
+
+.nl-page-left {
+  border-right: 1px solid rgba(90, 74, 48, 0.25);
+  box-shadow: inset -18px 0 26px -18px rgba(60, 45, 22, 0.6);
+}
+
+.nl-page-right {
+  border-left: 1px solid rgba(90, 74, 48, 0.2);
+  box-shadow: inset 18px 0 26px -18px rgba(60, 45, 29, 0.55);
+}
+
+/* Titel-/Inhaltsseite ohne linke Nachbarseite: mit Falz links */
+.nl-spread:not(:has(.nl-page-left)) .nl-page-right {
+  border-left: none;
+  box-shadow: inset 18px 0 26px -18px rgba(60, 45, 29, 0.6);
+}
+
+.nl-page h1, .nl-page h2, .nl-page h3 { font-family: Georgia, serif; letter-spacing: 0.02em; }
+.nl-page img { max-width: 100%; height: auto; }
+.nl-page table { border-collapse: collapse; width: 100%; font-size: 0.9em; }
+.nl-page td, .nl-page th { border: 1px solid rgba(90, 74, 48, 0.35); padding: 3px 6px; }
+.nl-page a { color: #5a3d1e; }
+
+/* Folio-Nummer unten außen auf dem Papier */
+.nl-page::after {
+  content: attr(data-folio);
+  position: absolute;
+  bottom: 3.5%;
+  font-size: 0.78rem;
+  color: rgba(60, 48, 30, 0.65);
+  font-variant-numeric: tabular-nums;
+}
+
+.nl-page-left::after { left: 7%; }
+.nl-page-right::after { right: 7%; }
+
+.nl-page:not([data-folio])::after,
+.nl-page[data-folio='']::after,
+.nl-page[data-folio='null']::after { content: none; }
+
+.nl-empty {
+  margin: auto;
+  opacity: 0.6;
+  font-style: italic;
+  letter-spacing: 0.05em;
+}
+
+/* Navigation */
+.nl-reader-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding-top: 8px;
+}
+
+/* Button-Thema: dunkler Grund, Goldakzent — bricht nicht aus dem Buch-Look */
+.nl-reader button {
+  background: linear-gradient(180deg, #3a3026 0%, #2b231b 100%);
+  color: #d8cfc0;
+  border: 1px solid rgba(185, 143, 47, 0.4);
+  border-radius: 4px;
+  padding: 4px 12px;
+  font-size: 0.8rem;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+}
+
+.nl-reader button:hover:not(:disabled) {
+  border-color: rgba(185, 143, 47, 0.8);
+  box-shadow: 0 0 6px rgba(185, 143, 47, 0.25);
+}
+
+.nl-reader button:disabled { opacity: 0.4; cursor: default; }
+
+.nl-share-btn.active {
+  border-color: #b98f2f;
+  box-shadow: 0 0 0 1px #b98f2f, 0 0 8px rgba(185, 143, 47, 0.35);
+}
+
+/* CoC7-Panel */
+.nl-coc7 {
+  margin-top: 8px;
+  padding: 8px 10px;
+  border: 1px solid rgba(185, 143, 47, 0.25);
+  border-radius: 6px;
+  background: rgba(30, 24, 16, 0.35);
+}
+
+.nl-coc7-name { font-weight: 600; margin-bottom: 6px; letter-spacing: 0.03em; }
+.nl-coc7-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.nl-chip {
+  font-size: 0.72rem;
+  padding: 2px 8px;
+  border-radius: 10px;
+  border: 1px solid rgba(185, 143, 47, 0.4);
+  background: rgba(185, 143, 47, 0.12);
+  white-space: nowrap;
+}
+
+.nl-chip-mythos { border-color: rgba(140, 50, 60, 0.6); background: rgba(140, 50, 60, 0.18); }
+.nl-chip-occult { border-color: rgba(90, 70, 140, 0.55); background: rgba(90, 70, 140, 0.16); }
+
+.nl-coc7-actions { display: flex; gap: 8px; margin-top: 8px; }
+
+.nl-coc7-act { font-size: 0.78rem; }
+
+.nl-coc7-keeper {
+  margin-top: 8px;
+  padding-top: 6px;
+  border-top: 1px dashed rgba(185, 143, 47, 0.25);
+  font-size: 0.85rem;
+}
+
+.nl-coc7-keeper-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  opacity: 0.7;
+  margin-bottom: 4px;
+}
+
+</style>
+</head>
+<body>
+<h1>Necronolib — Reader-Zustände</h1>
+<section class="rp-card"><h2>Geschlossen (Cover)</h2><div class="rp-frame"><div class="nl-reader">
+  <header class="nl-reader-bar">
+    <span class="nl-reader-title">Cultes des Goules</span>
+    <span class="nl-reader-pages">Cover</span>
+    <span class="nl-spacer"></span>
+    
+    <button type="button" class="nl-share-btn active" data-action="toggleShare"
+            title="Geteiltes Lesen: Spieler folgen deinem Umblättern">
+      <i class="fa-solid fa-tower-broadcast"></i>
+      Geteilt
+    </button>
+  </header>
+
+  <div class="nl-stage">
+    <div class="nl-closed">
+      <div class="nl-book"
+           data-nl-book
+           data-material="leather"
+           data-wear="medium"
+           data-clasp="brass"
+           data-thickness="tome"
+           style="--nlc-base:#5a1f24; --nlc-dark:#3d1216; --nlc-light:#7d3539; --nl-wear-o:0.34; --nl-spine-w:40px; --nl-pages-w:18px; --nl-title-size:1.35rem">
+        <div class="nl-pages-edge"></div>
+        <div class="nl-spine-hinge"></div>
+        <div class="nl-wear"></div>
+        <div class="nl-sheen"></div>
+        <div class="nl-title-wrap nl-pos-center">
+          <span class="nl-title nl-font-serif nl-effect-gilt">Cultes des Goules</span>
+        </div>
+        <div class="nl-clasp nl-clasp-top"></div>
+        <div class="nl-clasp nl-clasp-bottom"></div>
+      </div>
+      <button type="button" class="nl-open-btn" data-action="turnNext">
+        <i class="fa-solid fa-book-open"></i> Buch öffnen
+      </button>
+      <p class="nl-open-hint">Zum Aufschlagen weiter blättern →</p>
+    </div>
+  </div>
+
+  <footer class="nl-reader-nav">
+    <button type="button" data-action="turnPrev" disabled>
+      <i class="fa-solid fa-angle-left"></i> Zurück
+    </button>
+    <button type="button" data-action="turnNext" >
+      Weiter <i class="fa-solid fa-angle-right"></i>
+    </button>
+  </footer>
+
+  <aside class="nl-coc7">
+    <div class="nl-coc7-name"><i class="fa-solid fa-eye"></i> Cultes des Goules</div>
+    <div class="nl-coc7-chips">
+      <span class="nl-chip nl-chip-mythos">Mythos-Buch</span>
+      
+      <span class="nl-chip">STA-Verlust: 2W6</span>
+      <span class="nl-chip">Mythos-Wert: 11</span>
+      <span class="nl-chip">CMI +3</span>
+      <span class="nl-chip">CMF +8</span>
+      <span class="nl-chip">Studium (Wochen): 12</span>
+    </div>
+    <div class="nl-coc7-actions">
+      <button type="button" class="nl-coc7-act" data-action="coc7InitialReading"
+              title="Sprach-Probe auf Erstlesung (CoC7)">
+        <i class="fa-solid fa-book-open-reader"></i> Erstleseversuch
+      </button>
+      <button type="button" class="nl-coc7-act" data-action="coc7Reference"
+              title="Als Mythos-Referenz nutzen (CoC7, 1W4)">
+        <i class="fa-solid fa-scroll"></i> Nachschlagen
+      </button>
+    </div>
+    <div class="nl-coc7-keeper">
+      <div class="nl-coc7-keeper-label">Spielleitungs-Notizen</div>
+      <p><em>Der Comte d’Erlette … die Wahrheit steht in Kapitel VII.</em></p>
+    </div>
+  </aside>
+</div>
+</div></section>
+<section class="rp-card"><h2>Aufschlag (Seite 1)</h2><div class="rp-frame"><div class="nl-reader">
+  <header class="nl-reader-bar">
+    <span class="nl-reader-title">Cultes des Goules</span>
+    <span class="nl-reader-pages">1</span>
+    <span class="nl-spacer"></span>
+    
+    <button type="button" class="nl-share-btn active" data-action="toggleShare"
+            title="Geteiltes Lesen: Spieler folgen deinem Umblättern">
+      <i class="fa-solid fa-tower-broadcast"></i>
+      Geteilt
+    </button>
+  </header>
+
+  <div class="nl-stage">
+    <div class="nl-spread">
+      <div class="nl-page nl-page-right" data-folio="1"><h1>Cultes des Goules</h1><p><em>par le Comte d’Erlette</em></p><h2>Kapitel 1</h2><p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. (1.1)</p><p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. (1.2)</p><p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. (1.3)</p><p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. (1.4)</p></div>
+    </div>
+  </div>
+
+  <footer class="nl-reader-nav">
+    <button type="button" data-action="turnPrev" disabled>
+      <i class="fa-solid fa-angle-left"></i> Zurück
+    </button>
+    <button type="button" data-action="turnNext" >
+      Weiter <i class="fa-solid fa-angle-right"></i>
+    </button>
+  </footer>
+
+  <aside class="nl-coc7">
+    <div class="nl-coc7-name"><i class="fa-solid fa-eye"></i> Cultes des Goules</div>
+    <div class="nl-coc7-chips">
+      <span class="nl-chip nl-chip-mythos">Mythos-Buch</span>
+      
+      <span class="nl-chip">STA-Verlust: 2W6</span>
+      <span class="nl-chip">Mythos-Wert: 11</span>
+      <span class="nl-chip">CMI +3</span>
+      <span class="nl-chip">CMF +8</span>
+      <span class="nl-chip">Studium (Wochen): 12</span>
+    </div>
+    <div class="nl-coc7-actions">
+      <button type="button" class="nl-coc7-act" data-action="coc7InitialReading"
+              title="Sprach-Probe auf Erstlesung (CoC7)">
+        <i class="fa-solid fa-book-open-reader"></i> Erstleseversuch
+      </button>
+      <button type="button" class="nl-coc7-act" data-action="coc7Reference"
+              title="Als Mythos-Referenz nutzen (CoC7, 1W4)">
+        <i class="fa-solid fa-scroll"></i> Nachschlagen
+      </button>
+    </div>
+    <div class="nl-coc7-keeper">
+      <div class="nl-coc7-keeper-label">Spielleitungs-Notizen</div>
+      <p><em>Der Comte d’Erlette … die Wahrheit steht in Kapitel VII.</em></p>
+    </div>
+  </aside>
+</div>
+</div></section>
+<section class="rp-card"><h2>Doppelseite (2–3)</h2><div class="rp-frame"><div class="nl-reader">
+  <header class="nl-reader-bar">
+    <span class="nl-reader-title">Cultes des Goules</span>
+    <span class="nl-reader-pages">2–3</span>
+    <span class="nl-spacer"></span>
+    
+    <button type="button" class="nl-share-btn active" data-action="toggleShare"
+            title="Geteiltes Lesen: Spieler folgen deinem Umblättern">
+      <i class="fa-solid fa-tower-broadcast"></i>
+      Geteilt
+    </button>
+  </header>
+
+  <div class="nl-stage">
+    <div class="nl-spread">
+      <div class="nl-page nl-page-left" data-folio="2"><h2>Kapitel 2</h2><p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. (2.1)</p><p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. (2.2)</p><p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. (2.3)</p><p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. (2.4)</p></div>
+      <div class="nl-page nl-page-right" data-folio="3"><h2>Kapitel 3</h2><p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. (3.1)</p><p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. (3.2)</p><p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. (3.3)</p><p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. (3.4)</p></div>
+    </div>
+  </div>
+
+  <footer class="nl-reader-nav">
+    <button type="button" data-action="turnPrev" >
+      <i class="fa-solid fa-angle-left"></i> Zurück
+    </button>
+    <button type="button" data-action="turnNext" >
+      Weiter <i class="fa-solid fa-angle-right"></i>
+    </button>
+  </footer>
+
+  <aside class="nl-coc7">
+    <div class="nl-coc7-name"><i class="fa-solid fa-eye"></i> Cultes des Goules</div>
+    <div class="nl-coc7-chips">
+      <span class="nl-chip nl-chip-mythos">Mythos-Buch</span>
+      
+      <span class="nl-chip">STA-Verlust: 2W6</span>
+      <span class="nl-chip">Mythos-Wert: 11</span>
+      <span class="nl-chip">CMI +3</span>
+      <span class="nl-chip">CMF +8</span>
+      <span class="nl-chip">Studium (Wochen): 12</span>
+    </div>
+    <div class="nl-coc7-actions">
+      <button type="button" class="nl-coc7-act" data-action="coc7InitialReading"
+              title="Sprach-Probe auf Erstlesung (CoC7)">
+        <i class="fa-solid fa-book-open-reader"></i> Erstleseversuch
+      </button>
+      <button type="button" class="nl-coc7-act" data-action="coc7Reference"
+              title="Als Mythos-Referenz nutzen (CoC7, 1W4)">
+        <i class="fa-solid fa-scroll"></i> Nachschlagen
+      </button>
+    </div>
+    <div class="nl-coc7-keeper">
+      <div class="nl-coc7-keeper-label">Spielleitungs-Notizen</div>
+      <p><em>Der Comte d’Erlette … die Wahrheit steht in Kapitel VII.</em></p>
+    </div>
+  </aside>
+</div>
+</div></section>
+</body>
+</html>

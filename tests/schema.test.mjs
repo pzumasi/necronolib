@@ -3,7 +3,7 @@
  */
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { getBookFlags, setBookFlags, FLAG_BOOK, FLAG_VERSION } from '../scripts/schema.mjs';
+import { getBookFlags, setBookFlags, getLinkFlags, setLinkFlags, FLAG_BOOK, FLAG_VERSION, FLAG_LINK } from '../scripts/schema.mjs';
 
 /** Minimaler JournalEntry-Stub: update() schreibt in ein flaches Objekt. */
 function makeJournal(initialFlags = {}) {
@@ -61,4 +61,15 @@ test('setBookFlags speichert keine unnormalisierten Werte', async () => {
   assert.equal(update[FLAG_BOOK].material, 'leather');
   assert.equal(update[FLAG_BOOK].wear, 'medium');
   assert.equal(update[FLAG_BOOK].clasps, 'none');
+});
+
+test('Link-Flags lesen/schreiben und lösen Verknüpfung mit leerer UUID', async () => {
+  const j = makeJournal({ necronolib: { link: { coc7BookUuid: 'Item.abc' } } });
+  assert.deepEqual(getLinkFlags(j), { coc7BookUuid: 'Item.abc' });
+  const clean = await setLinkFlags(j, { coc7BookUuid: '  Item.xyz  ' });
+  assert.deepEqual(clean, { coc7BookUuid: 'Item.xyz' });
+  const removed = await setLinkFlags(j, { coc7BookUuid: '' });
+  assert.deepEqual(removed, { coc7BookUuid: '' });
+  assert.deepEqual(getLinkFlags(makeJournal()), { coc7BookUuid: '' });
+  assert.deepEqual(getLinkFlags({ flags: { necronolib: { link: null } } }), { coc7BookUuid: '' });
 });

@@ -18,7 +18,10 @@
       "TitlePlaceholder": "Titel auf dem Cover …",
       "TitleFont": "Schrift",
       "TitleEffect": "Effekt",
-      "TitlePosition": "Position"
+      "TitlePosition": "Position",
+      "Coc7Link": "CoC7-Buch",
+      "Coc7None": "— nicht verknüpft —",
+      "Coc7Hint": "Verknüpft das Journal mit einem CoC7-Buch-Item (Stabilität, Mythos, Erstlesung)."
     },
     "Option": {
       "Material": {
@@ -86,10 +89,40 @@
       }
     },
     "Context": {
-      "DesignCover": "Buch-Cover gestalten"
+      "DesignCover": "Buch-Cover gestalten",
+      "ReadBook": "Buch lesen"
     },
     "Warn": {
-      "GmOnly": "Nur die Spielleitung kann das Atelier öffnen."
+      "GmOnly": "Nur die Spielleitung kann das Atelier öffnen.",
+      "NoReadPermission": "Du hast keine Leserechte an diesem Journal."
+    },
+    "Reader": {
+      "Title": "Necronolib — Buch",
+      "Cover": "Cover",
+      "Empty": "Dieses Buch hat noch keine Seiten.",
+      "OpenButton": "Buch öffnen",
+      "OpenHint": "Zum Aufschlagen weiter blättern →",
+      "Prev": "Zurück",
+      "Next": "Weiter",
+      "Share": "Vorlesen",
+      "Sharing": "Geteilt",
+      "ShareTitle": "Geteiltes Lesen: Spieler folgen deinem Umblättern",
+      "SharedOn": "Geteiltes Lesen für „{journal}“ aktiviert.",
+      "SharedOff": "Geteiltes Lesen beendet.",
+      "RunesHint": "Okkulte Runen"
+    },
+    "Coc7": {
+      "Mythos": "Mythos-Buch",
+      "Occult": "Okkultes Buch",
+      "SanLoss": "STA-Verlust",
+      "MythosRating": "Mythos-Wert",
+      "Study": "Studium (Wochen)",
+      "KeeperNotes": "Spielleitungs-Notizen",
+      "InitialReading": "Erstleseversuch",
+      "InitialReadingTitle": "Sprach-Probe auf Erstlesung (CoC7)",
+      "Reference": "Nachschlagen",
+      "ReferenceTitle": "Als Mythos-Referenz nutzen (CoC7, 1W4)",
+      "ApiUnavailable": "CoC7-Mechanik nicht verfügbar — System prüfen."
     }
   }
 }

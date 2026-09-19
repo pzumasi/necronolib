@@ -18,7 +18,10 @@
       "TitlePlaceholder": "Title on the cover…",
       "TitleFont": "Font",
       "TitleEffect": "Effect",
-      "TitlePosition": "Position"
+      "TitlePosition": "Position",
+      "Coc7Link": "CoC7 book",
+      "Coc7None": "— not linked —",
+      "Coc7Hint": "Links the journal to a CoC7 book item (sanity, mythos, initial reading)."
     },
     "Option": {
       "Material": {
@@ -86,10 +89,40 @@
       }
     },
     "Context": {
-      "DesignCover": "Design book cover"
+      "DesignCover": "Design book cover",
+      "ReadBook": "Read book"
     },
     "Warn": {
-      "GmOnly": "Only the GM can open the atelier."
+      "GmOnly": "Only the GM can open the atelier.",
+      "NoReadPermission": "You lack permission to read this journal."
+    },
+    "Reader": {
+      "Title": "Necronolib — Book",
+      "Cover": "Cover",
+      "Empty": "This book has no pages yet.",
+      "OpenButton": "Open book",
+      "OpenHint": "Turn the page to open →",
+      "Prev": "Back",
+      "Next": "Next",
+      "Share": "Share",
+      "Sharing": "Shared",
+      "ShareTitle": "Shared reading: players follow your page turns",
+      "SharedOn": "Shared reading enabled for “{journal}”.",
+      "SharedOff": "Shared reading ended.",
+      "RunesHint": "Occult runes"
+    },
+    "Coc7": {
+      "Mythos": "Mythos tome",
+      "Occult": "Occult book",
+      "SanLoss": "SAN loss",
+      "MythosRating": "Mythos rating",
+      "Study": "Study (weeks)",
+      "KeeperNotes": "Keeper notes",
+      "InitialReading": "Initial reading",
+      "InitialReadingTitle": "Language check for initial reading (CoC7)",
+      "Reference": "Reference",
+      "ReferenceTitle": "Use as Mythos reference (CoC7, 1D4)",
+      "ApiUnavailable": "CoC7 mechanics unavailable — check system."
     }
   }
 }

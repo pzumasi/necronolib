@@ -2,7 +2,7 @@
   "id": "necronolib",
   "title": "Necronolib — Books & Tomes Atelier",
   "description": "Custom books and Mythos tomes for Foundry VTT: procedural cover design, page editor, immersive reader, and Call of Cthulhu 7th edition integration.",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "compatibility": {
     "minimum": "14",
     "verified": "14.364",
@@ -17,7 +17,8 @@
     "scripts/necronolib.mjs"
   ],
   "styles": [
-    "styles/necronolib.css"
+    "styles/necronolib.css",
+    "styles/reader.css"
   ],
   "languages": [
     {
@@ -45,5 +46,5 @@
   },
   "url": "https://github.com/pzumasi/necronolib",
   "manifest": "https://github.com/pzumasi/necronolib/releases/latest/download/module.json",
-  "download": "https://github.com/pzumasi/necronolib/releases/download/v0.0.1/necronolib.zip"
+  "download": "https://github.com/pzumasi/necronolib/releases/download/v0.1.0/necronolib.zip"
 }
