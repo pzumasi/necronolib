@@ -102,7 +102,7 @@ JournalEntry (foundry-nativ)
 
 ## Release v0.2.0 (27.09.2026)
 - version 0.2.0, download-URL auf v0.2.0; `npm run build` (tools/build-zip.mjs: Manifest-/Import-/Tag-Check, 18 Dateien)
-- Release per GitHub Action bei Tag-Push `v*` (`.github/workflows/release.yml`, Assets module.json + necronolib.zip, Text aus RELEASE_NOTES.md)
+- Release per GitHub Action bei Versionsänderung in module.json (Push), Tag-Push `v*` oder manuell; idempotent (`.github/workflows/release.yml`, Assets module.json + necronolib.zip, Text aus RELEASE_NOTES.md)
 - Tag v0.2.0 zeigt auf den Branch `claude/adoring-tesla-6vg29k` (main noch nicht gemergt)
 - Nächster Schritt (User): Repo öffentlich → Manifest-Install in Foundry v14 → Host-Test
 

@@ -49,8 +49,9 @@ npm run build                 # dist/necronolib.zip + dist/module.json (mit Impo
 ## Release
 
 1. `version` + `download`-URL in `module.json` (und `package.json`) anheben, `RELEASE_NOTES.md` schreiben
-2. Committen, pushen, Tag setzen: `git tag v0.2.0 && git push origin v0.2.0`
-3. GitHub Action `.github/workflows/release.yml` testet, baut und erstellt das Release mit `module.json` + `necronolib.zip`
+2. Committen und pushen (main oder `claude/**`) — alternativ Tag `v0.2.0` pushen oder Workflow manuell starten
+3. GitHub Action `.github/workflows/release.yml` erkennt die neue Version, testet, baut und erstellt Tag + Release
+   mit `module.json` + `necronolib.zip` (existiert das Release schon, passiert nichts)
 
 ## Umgebung
 
