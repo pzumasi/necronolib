@@ -1,0 +1,29 @@
+name: Release
+
+# Tag-Push (z. B. v0.2.0) → Tests, Zip-Build, GitHub-Release mit module.json + necronolib.zip.
+# Foundry-Manifest-URL: https://github.com/pzumasi/necronolib/releases/latest/download/module.json
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npm test
+      - run: node tools/build-zip.mjs "${GITHUB_REF_NAME}"
+      - uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ github.ref_name }}
+          body_path: RELEASE_NOTES.md
+          files: |
+            dist/module.json
+            dist/necronolib.zip

@@ -4,9 +4,11 @@
   "type": "module",
   "description": "Custom books & Mythos tomes for Foundry VTT (CoC7-focused Bindery alternative)",
   "scripts": {
-    "test": "node --test tests/*.test.mjs"
+    "test": "node --test tests/*.test.mjs",
+    "build": "node tools/build-zip.mjs"
   },
   "devDependencies": {
     "handlebars": "^4.7.9"
-  }
+  },
+  "version": "0.2.0"
 }
