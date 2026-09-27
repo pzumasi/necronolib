@@ -106,6 +106,11 @@ JournalEntry (foundry-nativ)
 - Tag v0.2.0 zeigt auf den Branch `claude/adoring-tesla-6vg29k` (main noch nicht gemergt)
 - Nächster Schritt (User): Repo öffentlich → Manifest-Install in Foundry v14 → Host-Test
 
+## Hotfix v0.2.1 (27.09.2026) — erster Live-Test Foundry v14
+- Live-Test User: „Buch lesen“ funktioniert; „Cover gestalten“ warf `Missing helper: "selected"` → Helper existiert in v14 nicht
+- Fix: selected-Flag in den Options-Objekten (atelier.mjs), Template ohne Helper; Regressionstest (knownHelpersOnly + Render)
+- Lehre: Preview-Harnesses dürfen keine Helper registrieren, die Foundry nicht hat
+
 ## Risiken & Offenpunkte
 
 - **v14-AppV2/Sockets**: Socket-Muster in Testwelt spike-testen, bevor Phase 2 voll ausgebaut wird

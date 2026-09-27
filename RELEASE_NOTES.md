@@ -1,25 +1,16 @@
-## v0.2.0 — Review-Release (Bugfixes, Härtung, Features)
+## v0.2.1 — Hotfix Atelier
 
-**Installation in Foundry (Repo muss öffentlich sein):** Add-on-Module → Modul installieren → Manifest-URL:
+**Installation/Update in Foundry:** Manifest-URL
 `https://github.com/pzumasi/necronolib/releases/latest/download/module.json`
-Alternativ `necronolib.zip` manuell nach `<FoundryData>/Data/modules/necronolib/` entpacken.
+(bestehende Installation: in Foundry „Aktualisieren“, danach Foundry neu starten)
 
-### Bugfixes
-- Geteiltes Lesen: `"socket": true` im Manifest ergänzt (Socket-Kanal war nie aktiv)
-- Kontextmenü „Buch lesen“ / „Cover gestalten“ erscheint wieder (v13+/v14-Hook `getJournalEntryContextOptions`)
-- Atelier: Live-Vorschau funktioniert ab dem ersten Öffnen (Titel, Schrift, Effekt, Position, Titel ↔ Runen)
-- Reader: Seitenreihenfolge nach Journal-Sortierung; lange Seiten werden nicht mehr oben abgeschnitten
-- Atelier: Verknüpfung zu Actor-Büchern bleibt beim Speichern erhalten
+### Fix
+- „Buch-Cover gestalten“ öffnete sich nicht: `Failed to render template part "atelier": Missing helper: "selected"`.
+  Den Handlebars-Helper `selected` gibt es in Foundry v14 nicht (mehr); die Auswahl wird jetzt im Code berechnet.
+  Der Fehler steckte schon in v0.1.0.
 
-### Sicherheit
-- Spieler sehen nur Seiten mit Beobachter-Recht; `Secret`-Blöcke nur für Besitzer
-- Socket folgt nur Events der Spielleitung; Payloads werden typgeprüft
+### Tests
+- Neuer Regressionstest: Templates dürfen nur Handlebars-Builtins + `localize` nutzen und werden damit gerendert
+  (die Preview-Harnesses hatten `selected` selbst registriert und den Fehler so verdeckt). 53 Tests grün.
 
-### Neu
-- SL-only-Umschalter je Seite im Reader
-- Vorlesen öffnet das Buch bei berechtigten Spielern automatisch
-- Reader aktualisiert sich live bei Journal-Änderungen
-- Blättern mit Pfeiltasten / Bild↑↓; Bild-Seiten und Seitentitel
-- Atelier: „Verwerfen“, Titel live beim Tippen
-
-51 Unit-Tests grün. **Noch nicht in echtem Foundry v14 getestet** — dieses Release ist für den Host-Test gedacht.
+Alle Änderungen aus v0.2.0 siehe https://github.com/pzumasi/necronolib/releases/tag/v0.2.0

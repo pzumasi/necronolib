@@ -10,7 +10,7 @@
       <label>{{localize "NECRONOLIB.Field.Material"}}</label>
       <select data-nl-field name="material" data-nl-rerender="1">
         {{#each materialOptions as |opt|}}
-        <option value="{{opt.id}}" {{selected opt.id ../cover.material}}>{{opt.label}}</option>
+        <option value="{{opt.id}}" {{#if opt.selected}}selected{{/if}}>{{opt.label}}</option>
         {{/each}}
       </select>
     </div>
@@ -19,7 +19,7 @@
       <label>{{localize "NECRONOLIB.Field.Palette"}}</label>
       <select data-nl-field name="palette">
         {{#each paletteOptions as |opt|}}
-        <option value="{{opt.id}}" {{selected opt.id ../cover.palette}}>{{opt.label}}</option>
+        <option value="{{opt.id}}" {{#if opt.selected}}selected{{/if}}>{{opt.label}}</option>
         {{/each}}
       </select>
     </div>
@@ -28,7 +28,7 @@
       <label>{{localize "NECRONOLIB.Field.Wear"}}</label>
       <select data-nl-field name="wear">
         {{#each wearOptions as |opt|}}
-        <option value="{{opt.id}}" {{selected opt.id ../cover.wear}}>{{opt.label}}</option>
+        <option value="{{opt.id}}" {{#if opt.selected}}selected{{/if}}>{{opt.label}}</option>
         {{/each}}
       </select>
     </div>
@@ -37,7 +37,7 @@
       <label>{{localize "NECRONOLIB.Field.Thickness"}}</label>
       <select data-nl-field name="thickness">
         {{#each thicknessOptions as |opt|}}
-        <option value="{{opt.id}}" {{selected opt.id ../cover.thickness}}>{{opt.label}}</option>
+        <option value="{{opt.id}}" {{#if opt.selected}}selected{{/if}}>{{opt.label}}</option>
         {{/each}}
       </select>
     </div>
@@ -46,7 +46,7 @@
       <label>{{localize "NECRONOLIB.Field.Clasps"}}</label>
       <select data-nl-field name="clasps">
         {{#each claspOptions as |opt|}}
-        <option value="{{opt.id}}" {{selected opt.id ../cover.clasps}}>{{opt.label}}</option>
+        <option value="{{opt.id}}" {{#if opt.selected}}selected{{/if}}>{{opt.label}}</option>
         {{/each}}
       </select>
     </div>
@@ -62,7 +62,7 @@
         <label>{{localize "NECRONOLIB.Field.TitleFont"}}</label>
         <select data-nl-field name="title.font">
           {{#each fontOptions as |opt|}}
-          <option value="{{opt.id}}" {{selected opt.id ../cover.title.font}}>{{opt.label}}</option>
+          <option value="{{opt.id}}" {{#if opt.selected}}selected{{/if}}>{{opt.label}}</option>
           {{/each}}
         </select>
       </div>
@@ -70,7 +70,7 @@
         <label>{{localize "NECRONOLIB.Field.TitleEffect"}}</label>
         <select data-nl-field name="title.effect">
           {{#each effectOptions as |opt|}}
-          <option value="{{opt.id}}" {{selected opt.id ../cover.title.effect}}>{{opt.label}}</option>
+          <option value="{{opt.id}}" {{#if opt.selected}}selected{{/if}}>{{opt.label}}</option>
           {{/each}}
         </select>
       </div>
@@ -80,7 +80,7 @@
       <label>{{localize "NECRONOLIB.Field.TitlePosition"}}</label>
       <select data-nl-field name="title.position">
         {{#each positionOptions as |opt|}}
-        <option value="{{opt.id}}" {{selected opt.id ../cover.title.position}}>{{opt.label}}</option>
+        <option value="{{opt.id}}" {{#if opt.selected}}selected{{/if}}>{{opt.label}}</option>
         {{/each}}
       </select>
     </div>

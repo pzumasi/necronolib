@@ -15,7 +15,6 @@ const readerSrc = readFileSync('templates/reader.hbs', 'utf8');
 // Echte Übersetzungen aus lang/de.json (verschachtelt → Punkt-Pfad).
 const de = JSON.parse(readFileSync('lang/de.json', 'utf8'));
 Handlebars.registerHelper('localize', (key) => String(key).split('.').reduce((o, k) => o?.[k], de) ?? key);
-Handlebars.registerHelper('selected', (a, b) => (a === b ? 'selected' : ''));
 
 import { coverVars, runesFor } from '../src/cover/model.mjs';
 

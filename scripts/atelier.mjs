@@ -106,14 +106,14 @@ export class NecronolibAtelier extends HandlebarsApplicationMixin(ApplicationV2)
       runesTitle: game.i18n.localize('NECRONOLIB.Atelier.RunesHint'),
       coc7Active: isCoC7(game),
       coc7Books,
-      materialOptions: NecronolibAtelier.#options('Material', COVER_MATERIALS),
+      materialOptions: NecronolibAtelier.#options('Material', COVER_MATERIALS, this.#cover.material),
       paletteOptions: NecronolibAtelier.#paletteOptions(this.#cover),
-      wearOptions: NecronolibAtelier.#options('Wear', WEAR_LEVELS),
-      thicknessOptions: NecronolibAtelier.#options('Thickness', THICKNESSES),
-      claspOptions: NecronolibAtelier.#options('Clasps', CLASP_STYLES),
-      fontOptions: NecronolibAtelier.#options('TitleFont', TITLE_FONTS),
-      effectOptions: NecronolibAtelier.#options('TitleEffect', TITLE_EFFECTS),
-      positionOptions: NecronolibAtelier.#options('TitlePosition', TITLE_POSITIONS)
+      wearOptions: NecronolibAtelier.#options('Wear', WEAR_LEVELS, this.#cover.wear),
+      thicknessOptions: NecronolibAtelier.#options('Thickness', THICKNESSES, this.#cover.thickness),
+      claspOptions: NecronolibAtelier.#options('Clasps', CLASP_STYLES, this.#cover.clasps),
+      fontOptions: NecronolibAtelier.#options('TitleFont', TITLE_FONTS, this.#cover.title.font),
+      effectOptions: NecronolibAtelier.#options('TitleEffect', TITLE_EFFECTS, this.#cover.title.effect),
+      positionOptions: NecronolibAtelier.#options('TitlePosition', TITLE_POSITIONS, this.#cover.title.position)
     };
   }
 
@@ -157,14 +157,20 @@ export class NecronolibAtelier extends HandlebarsApplicationMixin(ApplicationV2)
     }
   }
 
-  static #options(prefix, ids) {
-    return ids.map(id => ({ id, label: game.i18n.localize(`NECRONOLIB.Option.${prefix}.${id}`) }));
+  /** Select-Optionen inkl. selected-Flag (kein Handlebars-Helper nötig; `selected` fehlt in v14). */
+  static #options(prefix, ids, current) {
+    return ids.map(id => ({
+      id,
+      label: game.i18n.localize(`NECRONOLIB.Option.${prefix}.${id}`),
+      selected: id === current
+    }));
   }
 
   static #paletteOptions(cover) {
     return Object.keys(PALETTES[cover.material] ?? {}).map(id => ({
       id,
-      label: game.i18n.localize(`NECRONOLIB.Option.Palette.${cover.material}.${id}`)
+      label: game.i18n.localize(`NECRONOLIB.Option.Palette.${cover.material}.${id}`),
+      selected: id === cover.palette
     }));
   }
 
