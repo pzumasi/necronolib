@@ -1,7 +1,5 @@
 # Necronolib — Books & Tomes Atelier
 
-Open-Source-Nachbau von [The Bindery](https://foundryvtt.com/packages/bindery) (Origin Studios, Patreon-gated) — mit Fokus auf **Call of Cthulhu 7E** (CoC7-System).
-
 ## Ziel
 
 Bücher und Mythos-Tome in Foundry VTT gestalten und erleben:
