@@ -8,6 +8,8 @@ import { normalizeCover } from '../src/cover/model.mjs';
 import { getBookFlags, getLinkFlags } from './schema.mjs';
 import { isCoC7, listBookItems, bookStats } from './coc7.mjs';
 import { onSocket } from './sync.mjs';
+import { openShareDialog, installReaderOnlyGuard } from './share.mjs';
+import { exportBook, importBookData, importFile, openImportDialog, createBookFromCoc7Item, addDirectoryButton } from './io.mjs';
 
 const MODULE_ID = 'necronolib';
 
@@ -20,13 +22,13 @@ Hooks.once('init', () => {
 
   game.necronolib = {
     /** Reader öffnen (SL + Spieler; Rechte via journal.testUserPermission). */
-    openReader: (journal) => {
+    openReader: (journal, pageId) => {
       if (!journal) return null;
       if (!journal.testUserPermission(game.user, 'LIMITED')) {
         ui.notifications.warn(game.i18n.localize('NECRONOLIB.Warn.NoReadPermission'));
         return null;
       }
-      return NecronolibReader.open(journal);
+      return NecronolibReader.open(journal, pageId);
     },
     openAtelier: (journal) => {
       if (!game.user.isGM) {
@@ -40,7 +42,14 @@ Hooks.once('init', () => {
     normalizeCover,
     listBookItems: (collection) => listBookItems(collection ?? game.items),
     bookStats,
-    isCoC7: () => isCoC7(game)
+    isCoC7: () => isCoC7(game),
+    /* Teilen + Import/Export (GM; auch für Makros) */
+    share: (journal) => openShareDialog(journal),
+    exportBook,
+    importBookData,
+    importFile,
+    openImportDialog,
+    createBookFromCoc7Item
   };
 });
 
@@ -61,16 +70,22 @@ Hooks.on('getJournalEntryContextOptions', (_app, entries) => {
       if (journal) game.necronolib.openReader(journal);
     }
   });
-  entries.push({
-    label: 'NECRONOLIB.Context.DesignCover',
-    icon: '<i class="fa-solid fa-book"></i>',
+  const gmEntry = (label, icon, action) => entries.push({
+    label,
+    icon: `<i class="fa-solid ${icon}"></i>`,
     visible: (li) => game.user.isGM && Boolean(getJournal(li)),
     onClick: (_event, li) => {
       const journal = getJournal(li);
-      if (journal) game.necronolib.openAtelier(journal);
+      if (journal) action(journal);
     }
   });
+  gmEntry('NECRONOLIB.Context.DesignCover', 'fa-book', (j) => game.necronolib.openAtelier(j));
+  gmEntry('NECRONOLIB.Context.ShareBook', 'fa-share-nodes', (j) => openShareDialog(j));
+  gmEntry('NECRONOLIB.Context.ExportBook', 'fa-file-export', (j) => exportBook(j));
 });
+
+/* Import-Button im Journal-Verzeichnis (GM). v13+: html ist ein HTMLElement. */
+Hooks.on('renderJournalDirectory', (_app, html) => addDirectoryButton(html));
 
 /* Offene Reader aktuell halten, wenn sich Journal oder Seiten ändern. */
 Hooks.on('updateJournalEntry', (journal) => refreshReaders(journal));
@@ -81,5 +96,7 @@ for (const hook of ['createJournalEntryPage', 'updateJournalEntryPage', 'deleteJ
 
 Hooks.once('ready', () => {
   onSocket(handleSocket);
+  // Geteilte Bücher öffnen sich bei Spielern nur in der Leseansicht.
+  installReaderOnlyGuard((journal, pageId) => game.necronolib.openReader(journal, pageId));
   console.log(`${MODULE_ID} | ready — reader + atelier available via journal context menu`);
 });

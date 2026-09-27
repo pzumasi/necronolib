@@ -1,0 +1,41 @@
+{
+  "format": "necronolib-book",
+  "version": 1,
+  "name": "Cultes des Goules",
+  "cover": {
+    "material": "leather",
+    "palette": "black",
+    "wear": "heavy",
+    "clasps": "iron",
+    "thickness": "tome",
+    "title": { "text": "Cultes des Goules", "font": "runes", "effect": "gilt", "position": "center" }
+  },
+  "coc7": { "name": "Cultes des Goules" },
+  "pages": [
+    {
+      "name": "Titelblatt",
+      "type": "text",
+      "html": "<h1>Cultes des Goules</h1><p><em>par le Comte d’Erlette</em></p><p>Paris, 1702</p>"
+    },
+    {
+      "name": "Vorrede",
+      "type": "text",
+      "showTitle": true,
+      "titleLevel": 2,
+      "markdown": "Der Leser sei gewarnt: Was folgt, ist **nicht** für schwache Gemüter.\n\nDie Aufzeichnungen stammen aus den Katakomben unter der Stadt."
+    },
+    {
+      "name": "Kapitel VII (SL)",
+      "type": "text",
+      "keeperOnly": true,
+      "showTitle": true,
+      "html": "<p>Hier steht die Wahrheit über den Kult — nur für die Spielleitung.</p><section class=\"secret\"><p>Geheimnis: Der Comte lebt.</p></section>"
+    },
+    {
+      "name": "Holzschnitt",
+      "type": "image",
+      "src": "icons/svg/skull.svg",
+      "caption": "Ein Ghul, nach einem Holzschnitt von 1702"
+    }
+  ]
+}

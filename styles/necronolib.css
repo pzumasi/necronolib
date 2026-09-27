@@ -1,6 +1,17 @@
 /* Necronolib — prozedurale Buchcovers (CSS-Layer, keine Assets).
    Farben/Maße aus CSS-Vars (src/cover/model.mjs coverVars). */
 
+/* Runenschrift „Da Rune“ von Daniel Riantsoatahina (Dany Pool)
+   https://www.dafont.com/daniel-riantsoatahina.d11012 — Nutzung mit Erlaubnis des Autors
+   für dieses private, nicht-kommerzielle Projekt (siehe fonts/README.md). */
+@font-face {
+  font-family: 'Da Rune';
+  src: url('../fonts/DARUNE.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* ---------- Geschlossenes Buch (Frontansicht) ---------- */
 
 .nl-book {
@@ -144,7 +155,7 @@
 
 .nl-font-serif { font-family: Georgia, 'Times New Roman', serif; }
 .nl-font-sans { font-family: 'Segoe UI', system-ui, sans-serif; letter-spacing: 0.12em; }
-.nl-font-runes { font-family: 'Cascadia Mono', Consolas, monospace; letter-spacing: 0.22em; }
+.nl-font-runes { font-family: 'Da Rune', 'Cascadia Mono', Consolas, monospace; letter-spacing: 0.12em; text-transform: none; }
 
 .nl-effect-gilt {
   background: linear-gradient(175deg, #f5e29a 0%, #d4af37 40%, #a67c1a 60%, #f0d98c 100%);
@@ -352,34 +363,49 @@ button.active {
 }
 
 /* ---------- Atelier-Layout ---------- */
+/* Eigenes Body-Element: Foundry stylt .window-content als Flex-Spalte (höhere Spezifität),
+   deshalb liegt das Zwei-Spalten-Layout eine Ebene tiefer. */
+
+.nl-atelier-app .window-content { overflow: hidden; }
 
 .nl-atelier {
   display: flex;
-  gap: 18px;
-  padding: 8px 4px;
+  flex-direction: column;
   min-height: 0;
+  height: 100%;
   flex: 1;
 }
 
+.nl-atelier .nl-atelier-body {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 8px 4px;
+}
+
 .nl-atelier .nl-preview {
-  flex: 0 0 auto;
+  flex: 1 1 320px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  justify-content: center;
+  gap: 12px;
   padding: 18px 22px 12px;
-  background: radial-gradient(90% 70% at 50% 20%, rgba(120, 110, 90, 0.10), transparent 70%);
+  background: radial-gradient(90% 70% at 50% 35%, rgba(120, 110, 90, 0.14), transparent 70%);
   border-radius: 6px;
 }
 
 .nl-atelier .nl-preview .nl-book {
-  width: 240px;
-  height: 330px;
+  width: 290px;
+  height: 400px;
   flex: 0 0 auto;
 }
 
 .nl-atelier .nl-hint {
-  max-width: 260px;
+  max-width: 300px;
   margin: 0;
   text-align: center;
   font-size: 0.75rem;
@@ -387,10 +413,13 @@ button.active {
 }
 
 .nl-atelier .nl-controls {
-  flex: 1;
-  min-width: 0;
+  flex: 1 1 300px;
+  min-width: 260px;
+  display: flex;
+  flex-direction: column;
   gap: 8px;
   padding-right: 6px;
+  align-self: flex-start;
 }
 
 .nl-field { display: flex; flex-direction: column; gap: 2px; }
@@ -550,3 +579,11 @@ button.active {
 .nl-btn:hover:not(:disabled) { background: linear-gradient(180deg, rgba(75, 60, 40, 0.7), rgba(52, 41, 27, 0.7)); }
 .nl-btn:disabled { opacity: 0.4; cursor: default; }
 .nl-btn-share { border-color: rgba(120, 150, 120, 0.5); color: #cfe0c8; }
+
+/* Import-Button im Journal-Verzeichnis + Import-Dialog */
+.nl-import-btn { flex: 1 1 100%; }
+.nl-import-dialog fieldset { margin: 0 0 10px; }
+.nl-import-dialog .hint { font-size: 0.8rem; opacity: 0.8; margin: 0 0 6px; }
+.nl-import-dialog select, .nl-import-dialog input[type='file'] { width: 100%; }
+
+.nl-atelier .nl-field-hint { margin: 2px 0 0; font-size: 0.75rem; opacity: 0.7; line-height: 1.3; }

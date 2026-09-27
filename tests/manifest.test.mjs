@@ -78,3 +78,12 @@ test('Atelier-Template rendert mit v14-Helpern und markiert die gewählten Optio
   }
   assert.doesNotMatch(html, /value="leather" selected/);
 });
+
+test('Stylesheet-url()-Verweise (Fonts) existieren im Repo', () => {
+  for (const css of manifest.styles) {
+    for (const m of read(css).matchAll(/url\(\s*['"]?([^'")]+)['"]?\s*\)/g)) {
+      if (/^(data:|https?:|#)/.test(m[1])) continue;
+      assert.ok(existsSync(new URL(`../${css.replace(/[^/]+$/, '')}${m[1]}`, import.meta.url)), `${css}: ${m[1]}`);
+    }
+  }
+});

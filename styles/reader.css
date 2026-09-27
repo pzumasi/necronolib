@@ -24,9 +24,10 @@
 .nl-spacer { flex: 1; }
 .nl-following { opacity: 0.7; }
 
-.nl-share-btn { font-size: 0.75rem; opacity: 0.85; }
+.nl-gm-btn { font-size: 0.75rem; opacity: 0.85; width: auto; flex: none; }
+.nl-gm-btn.active { opacity: 1; }
 
-.nl-share-btn.active {
+.nl-gm-btn.active {
   box-shadow: 0 0 0 1px #b98f2f, 0 0 8px rgba(185, 143, 47, 0.35);
 }
 
@@ -54,6 +55,19 @@
 }
 
 .nl-closed .nl-book { width: 260px; height: 355px; }
+
+/* Geschlossenes Buch ist selbst anklickbar (öffnet Seite 1) */
+.nl-book-open-target {
+  cursor: pointer;
+  border-radius: 6px;
+  transition: transform 0.18s ease, filter 0.18s ease;
+  outline: none;
+}
+.nl-book-open-target:hover,
+.nl-book-open-target:focus-visible {
+  transform: translateY(-3px) rotate(-0.4deg);
+  filter: drop-shadow(0 0 10px rgba(185, 143, 47, 0.35));
+}
 
 .nl-open-btn {
   font-size: 0.9rem;
@@ -175,7 +189,7 @@
 
 .nl-reader button:disabled { opacity: 0.4; cursor: default; }
 
-.nl-share-btn.active {
+.nl-gm-btn.active {
   border-color: #b98f2f;
   box-shadow: 0 0 0 1px #b98f2f, 0 0 8px rgba(185, 143, 47, 0.35);
 }
@@ -263,3 +277,9 @@
   outline: 2px dashed rgba(140, 50, 60, 0.55);
   outline-offset: -6px;
 }
+
+/* Teilen-Dialog */
+.nl-share-dialog .nl-share-hint { font-size: 0.85rem; opacity: 0.85; margin: 0 0 8px; }
+.nl-share-dialog .nl-share-list { display: flex; flex-direction: column; gap: 4px; max-height: 320px; overflow-y: auto; }
+.nl-share-dialog .nl-share-row { display: flex; align-items: center; gap: 8px; }
+.nl-share-dialog .nl-online { color: #5fb35f; font-size: 0.5rem; }

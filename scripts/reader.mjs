@@ -1,11 +1,14 @@
 /**
  * Necronolib — Reader (MVP-Kern).
  * Immersives Buch: geschlossenes Cover → Aufschlag → Doppelseiten aus
- * JournalEntryPages; Umblättern (Buttons + Pfeiltasten), geteiltes Lesen via
- * Socket, GM-only-Seiten, CoC7-Anzeige + Mechanik-Delegation (Erstlesung/Nachschlagen).
+ * JournalEntryPages; Umblättern (Buttons, Klick aufs Buch, Pfeiltasten),
+ * „Anzeigen“ (bei verbundenen Spielern öffnen + Umblättern synchron via Socket),
+ * „Teilen“ (dauerhafter Zugriff, nur Leseansicht), GM-only-Seiten, CoC7-Anzeige + Mechanik-Delegation (Erstlesung/Nachschlagen).
  */
 import { getLinkFlags, coverContext } from './schema.mjs';
-import { visiblePages, buildSpreads, clampSpread, spreadLabel } from '../src/reader/pagination.mjs';
+import { visiblePages, buildSpreads, clampSpread, spreadLabel, spreadIndexOfPage } from '../src/reader/pagination.mjs';
+import { sharedUserIds, playersMissingAccess } from '../src/share/access.mjs';
+import { applyShare, openShareDialog } from './share.mjs';
 import { isCoC7, bookStats, keeperHtml } from './coc7.mjs';
 import { emitReaderEvent, isReaderEvent, isFromGM } from './sync.mjs';
 
@@ -33,8 +36,11 @@ export class NecronolibReader extends HandlebarsApplicationMixin(ApplicationV2) 
 
   #journal;
   #spread = -1;
-  #sharing = false;
+  /** GM: Buch wird gerade den verbundenen Spielern angezeigt. */
+  #showing = false;
   #following = false;
+  /** Spieler: Reader wurde durch „Anzeigen“ geöffnet (wird bei „Nicht mehr anzeigen“ geschlossen). */
+  openedByShow = false;
 
   static DEFAULT_OPTIONS = {
     classes: ['necronolib', 'nl-reader-app'],
@@ -48,7 +54,8 @@ export class NecronolibReader extends HandlebarsApplicationMixin(ApplicationV2) 
     actions: {
       turnPrev: NecronolibReader.#turnPrev,
       turnNext: NecronolibReader.#turnNext,
-      toggleShare: NecronolibReader.#toggleShare,
+      toggleShow: NecronolibReader.#toggleShow,
+      shareDialog: NecronolibReader.#shareDialog,
       toggleKeeperOnly: NecronolibReader.#toggleKeeperOnly,
       coc7InitialReading: NecronolibReader.#coc7InitialReading,
       coc7Reference: NecronolibReader.#coc7Reference
@@ -62,8 +69,12 @@ export class NecronolibReader extends HandlebarsApplicationMixin(ApplicationV2) 
     }
   };
 
-  /** Reader für ein Journal öffnen (Singleton je Journal). */
-  static open(journal) {
+  /**
+   * Reader für ein Journal öffnen (Singleton je Journal).
+   * @param {JournalEntry} journal
+   * @param {string} [pageId] optional direkt zu dieser Seite springen (z. B. Seitenlink)
+   */
+  static open(journal, pageId) {
     const key = journal?.uuid;
     if (!key) return null;
     let app = OPEN.get(key);
@@ -71,8 +82,15 @@ export class NecronolibReader extends HandlebarsApplicationMixin(ApplicationV2) 
       app = new NecronolibReader(journal);
       OPEN.set(key, app);
     }
+    if (pageId) app.gotoPage(pageId);
     app.render({ force: true });
     return app;
+  }
+
+  /** Zum Spread springen, der die Seite enthält (ohne Render). */
+  gotoPage(pageId) {
+    const index = spreadIndexOfPage(this.#spreads(), pageId);
+    if (index >= 0) this.#spread = index;
   }
 
   /** Offener Reader für eine Journal-UUID (oder undefined). */
@@ -119,8 +137,12 @@ export class NecronolibReader extends HandlebarsApplicationMixin(ApplicationV2) 
     return true;
   }
 
-  /** Socket: SL hat das Vorlesen beendet. */
+  /** Socket: SL zeigt das Buch nicht mehr an. Durch „Anzeigen“ geöffnete Reader schließen. */
   unfollow() {
+    if (this.openedByShow) {
+      this.close();
+      return;
+    }
     if (!this.#following) return;
     this.#following = false;
     this.render();
@@ -185,7 +207,11 @@ export class NecronolibReader extends HandlebarsApplicationMixin(ApplicationV2) 
       isFirst: this.#spread === (this.#hasCover() ? -1 : 0),
       isLast: this.#spread >= spreads.length - 1,
       hasPages: spreads.length > 0,
-      sharing: this.#sharing,
+      showing: this.#showing,
+      sharedCount: game.user.isGM ? sharedUserIds(this.#journal).length : 0,
+      sharedLabel: game.user.isGM
+        ? game.i18n.format('NECRONOLIB.Reader.SharedCount', { count: sharedUserIds(this.#journal).length })
+        : '',
       following: this.#following,
       isGM: game.user.isGM,
       coc7,
@@ -200,6 +226,11 @@ export class NecronolibReader extends HandlebarsApplicationMixin(ApplicationV2) 
     this.element.tabIndex = -1;
     this.element.addEventListener('keydown', (event) => {
       if (event.target?.closest?.('input, textarea, select, [contenteditable="true"]')) return;
+      if ((event.key === 'Enter' || event.key === ' ') && event.target?.closest?.('.nl-book-open-target')) {
+        event.preventDefault();
+        this.#turn(+1);
+        return;
+      }
       if (event.key === 'ArrowLeft' || event.key === 'PageUp') { event.preventDefault(); this.#turn(-1); }
       if (event.key === 'ArrowRight' || event.key === 'PageDown') { event.preventDefault(); this.#turn(+1); }
     });
@@ -207,10 +238,10 @@ export class NecronolibReader extends HandlebarsApplicationMixin(ApplicationV2) 
 
   async _onClose(options) {
     await super._onClose?.(options);
-    // Vorlesen beenden, damit Spieler nicht an einem geschlossenen Buch hängen.
-    if (this.#sharing && game.user.isGM) {
-      this.#sharing = false;
-      emitReaderEvent({ action: 'share', journalId: this.#journal.id, journalUuid: this.#journal.uuid, share: false });
+    // Anzeigen beenden, damit Spieler nicht an einem geschlossenen Buch hängen.
+    if (this.#showing && game.user.isGM) {
+      this.#showing = false;
+      emitReaderEvent({ action: 'show', journalId: this.#journal.id, journalUuid: this.#journal.uuid, show: false });
     }
     if (OPEN.get(this.#journal.uuid) === this) OPEN.delete(this.#journal.uuid);
   }
@@ -224,7 +255,7 @@ export class NecronolibReader extends HandlebarsApplicationMixin(ApplicationV2) 
   }
 
   #broadcast() {
-    if (!game.user.isGM || !this.#sharing) return;
+    if (!game.user.isGM || !this.#showing) return;
     emitReaderEvent({
       action: 'goto',
       journalId: this.#journal.id,
@@ -237,21 +268,45 @@ export class NecronolibReader extends HandlebarsApplicationMixin(ApplicationV2) 
   static #turnPrev() { this.#turn(-1); }
   static #turnNext() { this.#turn(+1); }
 
-  static #toggleShare() {
+  /**
+   * GM: „Anzeigen“ — öffnet das Buch bei allen verbundenen Spielern (Leseansicht, folgen dem Umblättern).
+   * Fehlen verbundenen Spielern Leserechte, wird angeboten, das Buch mit ihnen zu teilen.
+   */
+  static async #toggleShow() {
     if (!game.user.isGM) return;
-    this.#sharing = !this.#sharing;
-    if (this.#sharing) this.#following = false;
+    const journal = this.#journal;
+    if (!this.#showing) {
+      const missing = playersMissingAccess(game.users, u => journal.testUserPermission(u, 'OBSERVER'));
+      if (missing.length) {
+        const grant = await foundry.applications.api.DialogV2.confirm({
+          window: { title: game.i18n.localize('NECRONOLIB.Reader.MissingAccessTitle') },
+          content: `<p>${escapeHtml(game.i18n.format('NECRONOLIB.Reader.MissingAccess', { names: missing.map(u => u.name).join(', ') }))}</p>`,
+          rejectClose: false
+        });
+        if (grant) await applyShare(journal, [...sharedUserIds(journal), ...missing.map(u => u.id)]);
+      }
+      if (!game.users.some(u => u.active && !u.isGM)) ui.notifications.info(game.i18n.localize('NECRONOLIB.Reader.ShowNoPlayers'));
+    }
+    this.#showing = !this.#showing;
+    if (this.#showing) this.#following = false;
     emitReaderEvent({
-      action: 'share',
-      journalId: this.#journal.id,
-      journalUuid: this.#journal.uuid,
+      action: 'show',
+      journalId: journal.id,
+      journalUuid: journal.uuid,
       spread: this.#spread,
-      share: this.#sharing
+      show: this.#showing
     });
     ui.notifications.info(game.i18n.format(
-      this.#sharing ? 'NECRONOLIB.Reader.SharedOn' : 'NECRONOLIB.Reader.SharedOff',
-      { journal: this.#journal.name }
+      this.#showing ? 'NECRONOLIB.Reader.ShowOn' : 'NECRONOLIB.Reader.ShowOff',
+      { journal: journal.name }
     ));
+    this.render();
+  }
+
+  /** GM: „Teilen“ — Dialog mit Spieler-Checkboxen (dauerhafter Zugriff, nur Leseansicht). */
+  static async #shareDialog() {
+    if (!game.user.isGM) return;
+    await openShareDialog(this.#journal);
     this.render();
   }
 
@@ -317,26 +372,51 @@ export function refreshReaders(journal, { deleted = false } = {}) {
 }
 
 /**
+ * Wartet (max. timeoutMs) darauf, dass der eigene User Leserechte am Journal erhält.
+ * Hintergrund: „Anzeigen“ kann Rechte unmittelbar vorher erteilen; das Ownership-Update
+ * und das Socket-Event können in beliebiger Reihenfolge ankommen.
+ */
+function waitForAccess(journal, timeoutMs = 4000) {
+  if (journal.testUserPermission(game.user, 'LIMITED')) return Promise.resolve(true);
+  return new Promise((resolve) => {
+    const hookId = Hooks.on('updateJournalEntry', (doc) => {
+      if (doc.uuid !== journal.uuid || !doc.testUserPermission(game.user, 'LIMITED')) return;
+      Hooks.off('updateJournalEntry', hookId);
+      clearTimeout(timer);
+      resolve(true);
+    });
+    const timer = setTimeout(() => { Hooks.off('updateJournalEntry', hookId); resolve(false); }, timeoutMs);
+  });
+}
+
+/**
  * Socket-Dispatcher (im Entry registriert).
- * Akzeptiert nur Events von GM-Usern; „share" öffnet den Reader bei Spielern
- * automatisch (sofern Leserechte), „share: false" beendet das Folgen.
+ * Akzeptiert nur Events von GM-Usern; „show: true“ öffnet den Reader bei Spielern
+ * automatisch (sofern Leserechte), „show: false“ schließt ihn wieder bzw. beendet das Folgen.
  */
 export async function handleSocket(data) {
   if (!isReaderEvent(data)) return;
   if (data.by === game.user?.id) return; // eigenes Echo ignorieren
   if (!isFromGM(data, game.users)) return;
+  if (game.user.isGM) return; // andere GMs werden nicht gesteuert
   let app = OPEN.get(data.journalUuid);
 
-  if (data.action === 'share' && data.share === false) {
+  if (data.action === 'show' && data.show === false) {
     app?.unfollow();
     return;
   }
 
-  if (!app && data.action === 'share' && data.share === true) {
-    const journal = await fromUuidSafe(data.journalUuid);
+  if (!app && data.action === 'show' && data.show === true) {
+    // Journal kann (bei frisch erteilten Rechten) noch nicht sichtbar sein → kurz warten.
+    let journal = await fromUuidSafe(data.journalUuid);
+    if (!journal) {
+      await new Promise(r => setTimeout(r, 500));
+      journal = await fromUuidSafe(data.journalUuid);
+    }
     if (!journal || journal.documentName !== 'JournalEntry') return;
-    if (!journal.testUserPermission(game.user, 'LIMITED')) return;
+    if (!(await waitForAccess(journal))) return;
     app = NecronolibReader.open(journal);
+    if (app) app.openedByShow = true;
   }
   if (!app) return;
   app.follow(data.journalUuid, data.spread ?? 0);

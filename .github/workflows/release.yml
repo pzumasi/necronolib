@@ -9,7 +9,7 @@ on:
   push:
     tags: ['v*']
     branches: ['main', 'claude/**']
-    paths: ['module.json', '.github/workflows/release.yml']
+    paths: ['module.json', 'fonts/**', '.github/workflows/release.yml']
   workflow_dispatch:
 
 permissions:

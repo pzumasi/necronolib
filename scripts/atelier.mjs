@@ -36,7 +36,7 @@ export class NecronolibAtelier extends HandlebarsApplicationMixin(ApplicationV2)
       icon: 'fa-solid fa-book',
       resizable: true
     },
-    position: { width: 720, height: 560 },
+    position: { width: 860, height: 640 },
     tag: 'section',
     actions: {
       save: NecronolibAtelier.#onSave,
@@ -49,7 +49,7 @@ export class NecronolibAtelier extends HandlebarsApplicationMixin(ApplicationV2)
     atelier: {
       template: 'modules/necronolib/templates/atelier.hbs',
       root: true,
-      scrollable: ['.nl-controls']
+      scrollable: ['.nl-atelier-body']
     }
   };
 

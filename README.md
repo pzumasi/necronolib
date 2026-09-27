@@ -21,6 +21,8 @@ Bücher und Mythos-Tome in Foundry VTT gestalten und erleben:
 - [x] v0.1.0 Release (38 Tests grün) — [Releases](https://github.com/pzumasi/necronolib/releases)
 - [x] Review 27.09.2026 — Bugfixes, Sicherheits-Härtung, Features (siehe `PROJECTPLAN.md` → „Review 2026-09-27“)
 - [x] v0.2.0 Release (51 Tests grün) — Build/Release per GitHub Action bei Tag-Push
+- [x] v0.2.1 Hotfix Atelier (`selected`-Helper fehlt in v14)
+- [x] v0.3.0 Anzeigen/Teilen, Import/Export, Runenschrift, Atelier-Layout (72 Tests)
 - [ ] Foundry-Host-Spike (Installation + Testwelt)
 
 ## Installation (testbereit)
@@ -33,17 +35,20 @@ nach `<FoundryData>/Data/modules/necronolib/` entpacken (Ordnername exakt `necro
 Foundry komplett neu starten, Modul in der Welt aktivieren.
 
 - Ohne CoC7: Cover + Reader funktionieren systemagnostisch
-- Reader: Pfeiltasten/Bild↑↓ blättern; SL kann je Seite „nur Spielleitung“ umschalten (Auge-Button)
-- Vorlesen: Spieler mit Leserechten bekommen das Buch automatisch geöffnet und folgen dem Umblättern
+- Reader: Buch anklicken oder Pfeiltasten/Bild↑↓ zum Blättern; SL kann je Seite „nur Spielleitung“ umschalten (Auge-Button)
+- **Anzeigen** (SL): öffnet das Buch bei allen verbundenen Spielern, sie folgen dem Umblättern
+- **Teilen** (SL): ausgewählte Spieler bekommen dauerhaft Zugriff im Notizbuch-Tab — nur Leseansicht
+- **Import/Export** (SL): Button „Buch importieren“ im Notizbuch-Tab, Export per Rechtsklick — Format siehe `.claude/skills/necronolib-book-import/SKILL.md`
 - Mit CoC7: zusätzlich Verknüpfungs-Dropdown (Atelier) + Statistik/Aktionen im Reader
 
 ## Entwicklung
 
 ```powershell
-npm test              # 51 Unit-Tests (node --test)
+npm test              # 72 Unit-Tests (node --test)
 node tools/preview.mjs        # Cover-Matrix als HTML generieren (tools/preview.html)
 node tools/reader-preview.mjs # Reader-Zustände als HTML generieren (tools/reader-preview.html)
-npm run build                 # dist/necronolib.zip + dist/module.json (mit Import-/Manifest-Check)
+npm run build                 # dist/necronolib.zip + dist/module.json (mit Import-/Manifest-/Font-Check)
+npm run validate -- x.json    # Necronolib-Buchdatei vor dem Import prüfen
 ```
 
 ## Release
@@ -65,3 +70,8 @@ npm run build                 # dist/necronolib.zip + dist/module.json (mit Impo
 ```
 
 Ordnername muss exakt `necronolib` sein. Nach Installation Foundry komplett neu starten (kein F5).
+
+## Credits
+
+- Runenschrift **Da Rune** von Daniel Riantsoatahina (Dany Pool) — https://www.dafont.com/daniel-riantsoatahina.d11012 ·
+  Nutzung mit Erlaubnis des Autors für dieses private, nicht-kommerzielle Projekt (Details: `fonts/README.md`)

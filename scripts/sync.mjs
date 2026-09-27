@@ -9,8 +9,8 @@ export const SOCKET_SCOPE = 'module.necronolib';
 
 /**
  * Reader-Ereignis an alle anderen Clients senden.
- * @param {{action: 'goto'|'share', journalId?: string, journalUuid: string,
- *          spread?: number, share?: boolean, by?: string}} payload
+ * @param {{action: 'goto'|'show', journalId?: string, journalUuid: string,
+ *          spread?: number, show?: boolean, by?: string}} payload
  */
 export function emitReaderEvent(payload) {
   if (typeof game === 'undefined' || !game.socket) return false;
@@ -29,18 +29,18 @@ export function onSocket(handler) {
  * Guard für Reader-Nachrichten (reine Validierung, testbar).
  * Härtung: journalUuid muss mit "JournalEntry." beginnen (verhindert
  * fremde/manipulierte Events auf dem Kanal); spread muss – falls gesetzt –
- * eine ganze Zahl ≥ -1 sein; share – falls gesetzt – ein Boolean.
+ * eine ganze Zahl ≥ -1 sein; show – falls gesetzt – ein Boolean.
  * @returns {boolean} true wenn payload ein gültiges Reader-Event ist
  */
 export function isReaderEvent(data) {
   return Boolean(
     data
     && data.type === 'reader'
-    && (data.action === 'goto' || data.action === 'share')
+    && (data.action === 'goto' || data.action === 'show')
     && typeof data.journalUuid === 'string'
     && data.journalUuid.startsWith('JournalEntry.')
     && (data.spread === undefined || (Number.isInteger(data.spread) && data.spread >= -1))
-    && (data.share === undefined || typeof data.share === 'boolean')
+    && (data.show === undefined || typeof data.show === 'boolean')
   );
 }
 

@@ -1,16 +1,26 @@
-## v0.2.1 — Hotfix Atelier
+## v0.3.0 — Anzeigen/Teilen, Import/Export, Runenschrift, Atelier-Layout
 
-**Installation/Update in Foundry:** Manifest-URL
-`https://github.com/pzumasi/necronolib/releases/latest/download/module.json`
-(bestehende Installation: in Foundry „Aktualisieren“, danach Foundry neu starten)
+**Update in Foundry:** Modul „Aktualisieren“ (Manifest-URL unverändert:
+`https://github.com/pzumasi/necronolib/releases/latest/download/module.json`), danach Foundry neu starten.
 
-### Fix
-- „Buch-Cover gestalten“ öffnete sich nicht: `Failed to render template part "atelier": Missing helper: "selected"`.
-  Den Handlebars-Helper `selected` gibt es in Foundry v14 nicht (mehr); die Auswahl wird jetzt im Code berechnet.
-  Der Fehler steckte schon in v0.1.0.
+### Neu
+- **Anzeigen / Nicht mehr anzeigen** (SL, Reader-Leiste): öffnet das Buch bei allen verbundenen Spielern in der
+  Leseansicht; sie folgen dem Umblättern. Fehlen Leserechte, bietet Necronolib an, das Buch mit diesen Spielern zu teilen.
+  „Nicht mehr anzeigen“ schließt die so geöffneten Reader wieder.
+- **Teilen** (SL, Reader-Leiste oder Rechtsklick „Buch teilen …“): Checkbox-Liste aller Spieler (Standard: alle) →
+  dauerhafter Zugriff über den Notizbuch-Tab. Geteilte Bücher öffnen sich bei diesen Spielern **nur in der Leseansicht**
+  (auch über Links). Abwählen entzieht den Zugriff wieder.
+- **Import/Export** (SL): Button „Buch importieren“ im Notizbuch-Tab
+  - Necronolib-Buchdatei (`*.necronolib.json`) inkl. Cover, Seiten, SL-only-Seiten, CoC7-Verknüpfung
+  - CoC7-Buch-Item (Foundry-Export-JSON) → Item + verknüpftes Buch
+  - „Aus CoC7-Buch erstellen“ (Welt oder Kompendium) → verknüpftes Buch mit Beschreibung/Inhalt/SL-Notizen
+  - Export per Rechtsklick „Als Necronolib-Buch exportieren“
+  - Format + Workflow: `.claude/skills/necronolib-book-import/SKILL.md`, Prüfen mit `npm run validate -- datei.json`
+- **Runenschrift „Da Rune“** für Covertitel (Schrift „Runen (Da Rune)“) — von Daniel Riantsoatahina,
+  https://www.dafont.com/daniel-riantsoatahina.d11012, Nutzung mit Erlaubnis des Autors (privates, nicht-kommerzielles Projekt)
 
-### Tests
-- Neuer Regressionstest: Templates dürfen nur Handlebars-Builtins + `localize` nutzen und werden damit gerendert
-  (die Preview-Harnesses hatten `selected` selbst registriert und den Fehler so verdeckt). 53 Tests grün.
+### Verbessert
+- Atelier: größeres Standardfenster, zweispaltig, Inhalt scrollt, größere zentrierte Vorschau
+- Reader: geschlossenes Buch ist anklickbar (auch Enter/Leertaste); Hinweistext eindeutig („Klicke auf das Buch …“)
 
-Alle Änderungen aus v0.2.0 siehe https://github.com/pzumasi/necronolib/releases/tag/v0.2.0
+72 Unit-Tests grün. Anzeigen/Teilen/Import sind nur per Tests + Preview geprüft, **nicht live in Foundry v14**.

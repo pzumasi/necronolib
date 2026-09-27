@@ -111,6 +111,14 @@ JournalEntry (foundry-nativ)
 - Fix: selected-Flag in den Options-Objekten (atelier.mjs), Template ohne Helper; Regressionstest (knownHelpersOnly + Render)
 - Lehre: Preview-Harnesses dürfen keine Helper registrieren, die Foundry nicht hat
 
+## v0.3.0 (27.09.2026) — Feedback aus dem Live-Test
+- Atelier: Foundry stylt `.window-content` als Flex-Spalte (höhere Spezifität) → Layout in eigenes `.nl-atelier-body`; Fenster 860×640, Body scrollt, Vorschau 290×400 zentriert
+- Runenschrift „Da Rune“ (Daniel Riantsoatahina) gebündelt — Lizenz dafont „free for personal use“, **Erlaubnis des Autors vom User eingeholt** (27.09.2026), Attribution in `fonts/README.md`, README, CSS
+- Reader: geschlossenes Buch klickbar (+ Enter/Leertaste), Hinweistext neu
+- SL-Buttons neu definiert: **Anzeigen** (verbundene Spieler, Leseansicht, folgen Umblättern; Socket-Aktion `show`, ersetzt `share`) und **Teilen** (Dialog mit Checkboxen, OBSERVER + `flags.necronolib.share.users`, Leseansicht-Zwang via Patch von `JournalEntrySheet/PageSheet.render`)
+- Import/Export: Format `necronolib-book` v1 (`src/io/book-format.mjs`), Foundry-Teil `scripts/io.mjs`, Skill `.claude/skills/necronolib-book-import/SKILL.md`, Validator `npm run validate`, Beispiel `docs/examples/`
+- Offen/ungetestet live: Sheet-Umleitung (Klassennamen v14), DialogV2-Formzugriff, `recursive:false`-Ownership-Update, Showdown-Global für Markdown
+
 ## Risiken & Offenpunkte
 
 - **v14-AppV2/Sockets**: Socket-Muster in Testwelt spike-testen, bevor Phase 2 voll ausgebaut wird

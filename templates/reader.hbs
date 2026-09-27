@@ -18,10 +18,15 @@
     <span class="nl-spacer"></span>
     {{#if following}}<span class="nl-following" title="{{localize 'NECRONOLIB.Reader.Following'}}"><i class="fa-solid fa-eye"></i></span>{{/if}}
     {{#if isGM}}
-    <button type="button" class="nl-share-btn {{#if sharing}}active{{/if}}" data-action="toggleShare"
+    <button type="button" class="nl-gm-btn nl-show-btn {{#if showing}}active{{/if}}" data-action="toggleShow"
+            title="{{localize 'NECRONOLIB.Reader.ShowTitle'}}">
+      <i class="fa-solid {{#if showing}}fa-eye-slash{{else}}fa-eye{{/if}}"></i>
+      {{#if showing}}{{localize "NECRONOLIB.Reader.Unshow"}}{{else}}{{localize "NECRONOLIB.Reader.Show"}}{{/if}}
+    </button>
+    <button type="button" class="nl-gm-btn nl-share-btn {{#if sharedCount}}active{{/if}}" data-action="shareDialog"
             title="{{localize 'NECRONOLIB.Reader.ShareTitle'}}">
-      <i class="fa-solid fa-tower-broadcast"></i>
-      {{#if sharing}}{{localize "NECRONOLIB.Reader.Sharing"}}{{else}}{{localize "NECRONOLIB.Reader.Share"}}{{/if}}
+      <i class="fa-solid fa-share-nodes"></i>
+      {{#if sharedCount}}{{sharedLabel}}{{else}}{{localize "NECRONOLIB.Reader.Share"}}{{/if}}
     </button>
     {{/if}}
   </header>
@@ -30,13 +35,17 @@
     {{#if isClosed}}
     {{!-- Geschlossenes Buch + Aufschlagen --}}
     <div class="nl-closed">
-      {{> "modules/necronolib/templates/partials/book.hbs" cover=cover.cover vars=cover.vars runes=cover.runes runesTitle=cover.runesTitle}}
       {{#if hasPages}}
+      <div class="nl-book-open-target" role="button" tabindex="0" data-action="turnNext"
+           title="{{localize 'NECRONOLIB.Reader.OpenButton'}}" aria-label="{{localize 'NECRONOLIB.Reader.OpenButton'}}">
+        {{> "modules/necronolib/templates/partials/book.hbs" cover=cover.cover vars=cover.vars runes=cover.runes runesTitle=cover.runesTitle}}
+      </div>
       <button type="button" class="nl-open-btn" data-action="turnNext">
         <i class="fa-solid fa-book-open"></i> {{localize "NECRONOLIB.Reader.OpenButton"}}
       </button>
       <p class="nl-open-hint">{{localize "NECRONOLIB.Reader.OpenHint"}}</p>
       {{else}}
+      {{> "modules/necronolib/templates/partials/book.hbs" cover=cover.cover vars=cover.vars runes=cover.runes runesTitle=cover.runesTitle}}
       <p class="nl-empty">{{localize "NECRONOLIB.Reader.Empty"}}</p>
       {{/if}}
     </div>
