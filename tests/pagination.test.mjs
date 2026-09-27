@@ -72,3 +72,39 @@ test('spreadLabel formatiert Seitenzahlen', () => {
   assert.equal(spreadLabel({ leftNo: 4, rightNo: null }), '4');
   assert.equal(spreadLabel(null), '');
 });
+
+test('visiblePages sortiert nach page.sort (stabil bei Gleichstand)', () => {
+  const pages = [
+    { id: 'c', sort: 300 }, { id: 'a', sort: 100 }, { id: 'b', sort: 200 }, { id: 'x' }, { id: 'y' }
+  ];
+  assert.deepEqual(visiblePages(pages, { isGM: true }).map(p => p.id), ['x', 'y', 'a', 'b', 'c']);
+});
+
+test('visiblePages respektiert canView (Foundry-Seitenrechte)', () => {
+  const pages = [{ id: 'a', ok: true }, { id: 'b', ok: false }, { id: 'c', ok: true }];
+  const res = visiblePages(pages, { isGM: false, canView: p => p.ok });
+  assert.deepEqual(res.map(p => p.id), ['a', 'c']);
+});
+
+test('visiblePages verändert die Eingabeliste nicht', () => {
+  const pages = [{ id: 'b', sort: 2 }, { id: 'a', sort: 1 }];
+  visiblePages(pages);
+  assert.deepEqual(pages.map(p => p.id), ['b', 'a']);
+});
+
+test('clampSpread toleriert NaN/Strings/Brüche (Socket-Payloads)', () => {
+  assert.equal(clampSpread(Number.NaN, 3), 0);
+  assert.equal(clampSpread('2', 3), 0);
+  assert.equal(clampSpread(Infinity, 3), 0);
+  assert.equal(clampSpread(1.7, 3), 1);
+  assert.equal(clampSpread(1, Number.NaN), 0);
+});
+
+test('spreadIndexOfPage findet den Spread einer Seite', async () => {
+  const { spreadIndexOfPage } = await import('../src/reader/pagination.mjs');
+  const spreads = buildSpreads([{ id: 'a' }, { id: 'b' }, { id: 'c' }, { id: 'd' }]);
+  assert.equal(spreadIndexOfPage(spreads, 'a'), 0);
+  assert.equal(spreadIndexOfPage(spreads, 'c'), 1);
+  assert.equal(spreadIndexOfPage(spreads, 'd'), 2);
+  assert.equal(spreadIndexOfPage(spreads, 'zz'), -1);
+});

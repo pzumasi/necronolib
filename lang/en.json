@@ -6,7 +6,11 @@
       "Save": "Save",
       "Reset": "Reset",
       "Saved": "Cover saved for “{journal}”.",
-      "RunesHint": "Without a title: procedural runes"
+      "RunesHint": "Without a title: procedural runes",
+      "SaveFailed": "Saving failed — see console for details.",
+      "Revert": "Revert",
+      "RevertTitle": "Discard unsaved changes (reload saved state)",
+      "ResetTitle": "Reset all fields to defaults (not saved yet)"
     },
     "Field": {
       "Material": "Material",
@@ -49,7 +53,7 @@
       "TitleFont": {
         "serif": "Serif (classic)",
         "sans": "Sans (plain)",
-        "runes": "Runes (monospace)"
+        "runes": "Runes (Da Rune)"
       },
       "TitleEffect": {
         "gilt": "Gilt",
@@ -90,7 +94,9 @@
     },
     "Context": {
       "DesignCover": "Design book cover",
-      "ReadBook": "Read book"
+      "ReadBook": "Read book",
+      "ShareBook": "Share book …",
+      "ExportBook": "Export as Necronolib book"
     },
     "Warn": {
       "GmOnly": "Only the GM can open the atelier.",
@@ -101,15 +107,30 @@
       "Cover": "Cover",
       "Empty": "This book has no pages yet.",
       "OpenButton": "Open book",
-      "OpenHint": "Turn the page to open →",
+      "OpenHint": "Click the book or “Open book”.",
       "Prev": "Back",
       "Next": "Next",
       "Share": "Share",
-      "Sharing": "Shared",
-      "ShareTitle": "Shared reading: players follow your page turns",
-      "SharedOn": "Shared reading enabled for “{journal}”.",
-      "SharedOff": "Shared reading ended.",
-      "RunesHint": "Occult runes"
+      "ShareTitle": "Gives selected players permanent access via the Journal tab — they can only open it in reader view.",
+      "RunesHint": "Occult runes",
+      "Unsupported": "This page type is not shown in the book — please open it in the journal.",
+      "KeeperOnlyOn": "Keeper only — click to reveal to players",
+      "KeeperOnlyOff": "Visible to players — click to make keeper only",
+      "Following": "You are following the keeper's reading",
+      "Show": "Show",
+      "Unshow": "Stop showing",
+      "ShowTitle": "Opens the book in reader view for all connected players. They follow your page turns until you click “Stop showing”.",
+      "ShowOn": "“{journal}” is shown to connected players.",
+      "ShowOff": "“{journal}” is no longer shown.",
+      "ShowNoPlayers": "No players connected — the book opens for players who are online now.",
+      "MissingAccessTitle": "Missing read access",
+      "MissingAccess": "These connected players lack read access: {names}. Share the book with them (permanent, reader view only)?",
+      "SharedCount": "Shared ({count})",
+      "ShareDialogTitle": "Share book: {journal}",
+      "ShareDialogHint": "Selected players see the book permanently in the Journal tab and can only open it in reader view. Unselecting revokes access.",
+      "ShareNoPlayers": "There are no player accounts.",
+      "ShareApply": "Apply",
+      "ShareSaved": "Sharing for “{journal}” updated ({count} players)."
     },
     "Coc7": {
       "Mythos": "Mythos tome",
@@ -123,6 +144,30 @@
       "Reference": "Reference",
       "ReferenceTitle": "Use as Mythos reference (CoC7, 1D4)",
       "ApiUnavailable": "CoC7 mechanics unavailable — check system."
+    },
+    "Io": {
+      "ImportTitle": "Necronolib — Import book",
+      "ImportButton": "Import",
+      "ImportButtonShort": "Import book",
+      "FromFile": "From file",
+      "FromFileHint": "Necronolib book (*.necronolib.json).",
+      "FromFileHintCoc7": "Necronolib book (*.necronolib.json) or exported CoC7 book item (JSON, type “book”).",
+      "FromCoc7": "Create from CoC7 book",
+      "FromCoc7Hint": "Creates a book with description + keeper notes and links it. Compendium books are imported into the world first.",
+      "NoCoc7Books": "No CoC7 book items found in world or compendiums.",
+      "GroupWorld": "World",
+      "NothingSelected": "Please choose a file or a CoC7 book.",
+      "NotJson": "The file is not valid JSON.",
+      "UnknownFormat": "Unknown format — expected a Necronolib book or CoC7 book item.",
+      "Invalid": "Import rejected: {errors}",
+      "NeedsCoc7": "This requires the CoC7 system.",
+      "LinkNotFound": "CoC7 book “{name}” not found — imported without link.",
+      "Imported": "“{journal}” imported ({pages} pages, {warnings} notes — see console).",
+      "CreatedFromCoc7": "Book “{journal}” created from CoC7 item and linked.",
+      "Exported": "“{journal}” exported.",
+      "PageDescription": "Description",
+      "PageKeeper": "Keeper notes",
+      "PageContent": "Contents"
     }
   }
 }

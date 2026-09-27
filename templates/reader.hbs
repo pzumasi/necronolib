@@ -1,15 +1,32 @@
 {{!-- Necronolib — Reader (geschlossenes Buch → Doppelseiten) --}}
 <div class="nl-reader">
+  {{#*inline "nlPage"}}
+  <div class="nl-page nl-page-{{side}} {{#if page.keeperOnly}}nl-keeper-only{{/if}}" data-folio="{{page.folio}}" data-page-id="{{page.id}}">
+    {{#if isGM}}
+    <button type="button" class="nl-keeper-toggle {{#if page.keeperOnly}}active{{/if}}" data-action="toggleKeeperOnly" data-page-id="{{page.id}}"
+            title="{{#if page.keeperOnly}}{{localize 'NECRONOLIB.Reader.KeeperOnlyOn'}}{{else}}{{localize 'NECRONOLIB.Reader.KeeperOnlyOff'}}{{/if}}">
+      <i class="fa-solid {{#if page.keeperOnly}}fa-eye-slash{{else}}fa-eye{{/if}}"></i>
+    </button>
+    {{/if}}
+    {{#if page.showTitle}}<div class="nl-page-heading nl-page-heading-{{page.titleTag}}">{{page.name}}</div>{{/if}}
+    {{{page.html}}}
+  </div>
+  {{/inline}}
   <header class="nl-reader-bar">
     <span class="nl-reader-title">{{journal.name}}</span>
     <span class="nl-reader-pages">{{label}}</span>
     <span class="nl-spacer"></span>
-    {{#if following}}<span class="nl-following"><i class="fa-solid fa-eye"></i></span>{{/if}}
+    {{#if following}}<span class="nl-following" title="{{localize 'NECRONOLIB.Reader.Following'}}"><i class="fa-solid fa-eye"></i></span>{{/if}}
     {{#if isGM}}
-    <button type="button" class="nl-share-btn {{#if sharing}}active{{/if}}" data-action="toggleShare"
+    <button type="button" class="nl-gm-btn nl-show-btn {{#if showing}}active{{/if}}" data-action="toggleShow"
+            title="{{localize 'NECRONOLIB.Reader.ShowTitle'}}">
+      <i class="fa-solid {{#if showing}}fa-eye-slash{{else}}fa-eye{{/if}}"></i>
+      {{#if showing}}{{localize "NECRONOLIB.Reader.Unshow"}}{{else}}{{localize "NECRONOLIB.Reader.Show"}}{{/if}}
+    </button>
+    <button type="button" class="nl-gm-btn nl-share-btn {{#if sharedCount}}active{{/if}}" data-action="shareDialog"
             title="{{localize 'NECRONOLIB.Reader.ShareTitle'}}">
-      <i class="fa-solid fa-tower-broadcast"></i>
-      {{#if sharing}}{{localize "NECRONOLIB.Reader.Sharing"}}{{else}}{{localize "NECRONOLIB.Reader.Share"}}{{/if}}
+      <i class="fa-solid fa-share-nodes"></i>
+      {{#if sharedCount}}{{sharedLabel}}{{else}}{{localize "NECRONOLIB.Reader.Share"}}{{/if}}
     </button>
     {{/if}}
   </header>
@@ -18,13 +35,17 @@
     {{#if isClosed}}
     {{!-- Geschlossenes Buch + Aufschlagen --}}
     <div class="nl-closed">
-      {{> "modules/necronolib/templates/partials/book.hbs" cover=cover.cover vars=cover.vars runes=cover.runes runesTitle=cover.runesTitle}}
       {{#if hasPages}}
+      <div class="nl-book-open-target" role="button" tabindex="0" data-action="turnNext"
+           title="{{localize 'NECRONOLIB.Reader.OpenButton'}}" aria-label="{{localize 'NECRONOLIB.Reader.OpenButton'}}">
+        {{> "modules/necronolib/templates/partials/book.hbs" cover=cover.cover vars=cover.vars runes=cover.runes runesTitle=cover.runesTitle}}
+      </div>
       <button type="button" class="nl-open-btn" data-action="turnNext">
         <i class="fa-solid fa-book-open"></i> {{localize "NECRONOLIB.Reader.OpenButton"}}
       </button>
       <p class="nl-open-hint">{{localize "NECRONOLIB.Reader.OpenHint"}}</p>
       {{else}}
+      {{> "modules/necronolib/templates/partials/book.hbs" cover=cover.cover vars=cover.vars runes=cover.runes runesTitle=cover.runesTitle}}
       <p class="nl-empty">{{localize "NECRONOLIB.Reader.Empty"}}</p>
       {{/if}}
     </div>
@@ -32,10 +53,10 @@
     {{!-- Doppelseite (Spread 0: nur rechte Seite = Titelseite) --}}
     <div class="nl-spread">
       {{#if current.left}}
-      <div class="nl-page nl-page-left" data-folio="{{current.leftNo}}">{{{current.left.text.content}}}</div>
+      {{> nlPage page=current.left side="left" isGM=isGM}}
       {{/if}}
       {{#if current.right}}
-      <div class="nl-page nl-page-right" data-folio="{{current.rightNo}}">{{{current.right.text.content}}}</div>
+      {{> nlPage page=current.right side="right" isGM=isGM}}
       {{/if}}
     </div>
     {{else}}

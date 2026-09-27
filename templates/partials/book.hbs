@@ -1,4 +1,5 @@
-{{!-- Necronolib — Cover-Partial (geschlossen Buch, Frontansicht). Nutzt coverVars-Werte aus dem Kontext (vars). --}}
+{{!-- Necronolib — Cover-Partial (geschlossen Buch, Frontansicht). Nutzt coverVars-Werte aus dem Kontext (vars).
+      Titel und Runen werden immer gerendert (hidden-Toggle), damit applyCover live umschalten kann. --}}
 <div class="nl-book"
      data-nl-book
      data-material="{{cover.material}}"
@@ -10,15 +11,10 @@
   <div class="nl-spine-hinge"></div>
   <div class="nl-wear"></div>
   <div class="nl-sheen"></div>
-  {{#if cover.title.text}}
-  <div class="nl-title-wrap nl-pos-{{cover.title.position}}">
-    <span class="nl-title nl-font-{{cover.title.font}} nl-effect-{{cover.title.effect}}">{{cover.title.text}}</span>
+  <div class="nl-title-wrap nl-pos-{{cover.title.position}}" data-nl-title-wrap>
+    <span class="nl-title nl-font-{{cover.title.font}} nl-effect-{{cover.title.effect}}" data-nl-title {{#unless cover.title.text}}hidden{{/unless}}>{{cover.title.text}}</span>
+    <span class="nl-runes" data-nl-runes title="{{runesTitle}}" {{#if cover.title.text}}hidden{{/if}}>{{runes}}</span>
   </div>
-  {{else if runes}}
-  <div class="nl-title-wrap nl-pos-{{cover.title.position}}">
-    <span class="nl-runes" title="{{runesTitle}}">{{runes}}</span>
-  </div>
-  {{/if}}
   <div class="nl-clasp nl-clasp-top"></div>
   <div class="nl-clasp nl-clasp-bottom"></div>
 </div>

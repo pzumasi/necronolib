@@ -38,6 +38,8 @@ test('applyCover setzt CSS-Vars und data-Attribute am Buch-Element', () => {
   assert.equal(title.dataset.font, 'runes');
   assert.equal(title.dataset.effect, 'gilt');
   assert.equal(title.dataset.pos, 'top');
+  assert.equal(title.className, "nl-title nl-font-runes nl-effect-gilt");
+  assert.equal(title.hidden, false);
 });
 
 test('applyCover mit Raw-Cover fällt auf Defaults zurück (normalisiert)', () => {
@@ -52,4 +54,24 @@ test('applyCover mit Raw-Cover fällt auf Defaults zurück (normalisiert)', () =
 test('applyCover gibt false zurück, wenn kein Buch-Element existiert', () => {
   assert.equal(applyCover({ querySelector: () => null }, {}), false);
   assert.equal(applyCover(null, {}), false);
+});
+
+test('applyCover schaltet Titel ↔ Runen und setzt Positionsklasse am Wrapper', () => {
+  const title = { textContent: '', dataset: {}, className: '', hidden: true };
+  const runes = { hidden: false };
+  const wrap = { className: '' };
+  const book = {
+    dataset: {},
+    style: { setProperty() {} },
+    querySelector: (sel) => ({ '[data-nl-title]': title, '[data-nl-runes]': runes, '[data-nl-title-wrap]': wrap }[sel] ?? null)
+  };
+  const root = { querySelector: () => book };
+  applyCover(root, { title: { text: 'Necronomicon', position: 'bottom', effect: 'ink', font: 'sans' } });
+  assert.equal(title.hidden, false);
+  assert.equal(runes.hidden, true);
+  assert.equal(wrap.className, 'nl-title-wrap nl-pos-bottom');
+  assert.equal(title.className, 'nl-title nl-font-sans nl-effect-ink');
+  applyCover(root, { title: { text: '   ' } });
+  assert.equal(title.hidden, true);
+  assert.equal(runes.hidden, false);
 });

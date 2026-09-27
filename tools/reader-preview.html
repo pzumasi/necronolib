@@ -15,6 +15,17 @@
 /* Necronolib — prozedurale Buchcovers (CSS-Layer, keine Assets).
    Farben/Maße aus CSS-Vars (src/cover/model.mjs coverVars). */
 
+/* Runenschrift „Da Rune“ von Daniel Riantsoatahina (Dany Pool)
+   https://www.dafont.com/daniel-riantsoatahina.d11012 — Nutzung mit Erlaubnis des Autors
+   für dieses private, nicht-kommerzielle Projekt (siehe fonts/README.md). */
+@font-face {
+  font-family: 'Da Rune';
+  src: url('../fonts/DARUNE.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* ---------- Geschlossenes Buch (Frontansicht) ---------- */
 
 .nl-book {
@@ -144,6 +155,9 @@
   max-width: 100%;
 }
 
+/* hidden-Toggle (Titel ↔ Runen, live im Atelier) */
+.nl-book [hidden] { display: none !important; }
+
 /* Titel-lose Bücher: prozedurale Runen */
 .nl-runes {
   font-size: 1.15rem;
@@ -155,7 +169,7 @@
 
 .nl-font-serif { font-family: Georgia, 'Times New Roman', serif; }
 .nl-font-sans { font-family: 'Segoe UI', system-ui, sans-serif; letter-spacing: 0.12em; }
-.nl-font-runes { font-family: 'Cascadia Mono', Consolas, monospace; letter-spacing: 0.22em; }
+.nl-font-runes { font-family: 'Da Rune', 'Cascadia Mono', Consolas, monospace; letter-spacing: 0.12em; text-transform: none; }
 
 .nl-effect-gilt {
   background: linear-gradient(175deg, #f5e29a 0%, #d4af37 40%, #a67c1a 60%, #f0d98c 100%);
@@ -363,34 +377,49 @@ button.active {
 }
 
 /* ---------- Atelier-Layout ---------- */
+/* Eigenes Body-Element: Foundry stylt .window-content als Flex-Spalte (höhere Spezifität),
+   deshalb liegt das Zwei-Spalten-Layout eine Ebene tiefer. */
+
+.nl-atelier-app .window-content { overflow: hidden; }
 
 .nl-atelier {
   display: flex;
-  gap: 18px;
-  padding: 8px 4px;
+  flex-direction: column;
   min-height: 0;
+  height: 100%;
   flex: 1;
 }
 
+.nl-atelier .nl-atelier-body {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 8px 4px;
+}
+
 .nl-atelier .nl-preview {
-  flex: 0 0 auto;
+  flex: 1 1 320px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  justify-content: center;
+  gap: 12px;
   padding: 18px 22px 12px;
-  background: radial-gradient(90% 70% at 50% 20%, rgba(120, 110, 90, 0.10), transparent 70%);
+  background: radial-gradient(90% 70% at 50% 35%, rgba(120, 110, 90, 0.14), transparent 70%);
   border-radius: 6px;
 }
 
 .nl-atelier .nl-preview .nl-book {
-  width: 240px;
-  height: 330px;
+  width: 290px;
+  height: 400px;
   flex: 0 0 auto;
 }
 
 .nl-atelier .nl-hint {
-  max-width: 260px;
+  max-width: 300px;
   margin: 0;
   text-align: center;
   font-size: 0.75rem;
@@ -398,10 +427,13 @@ button.active {
 }
 
 .nl-atelier .nl-controls {
-  flex: 1;
-  min-width: 0;
+  flex: 1 1 300px;
+  min-width: 260px;
+  display: flex;
+  flex-direction: column;
   gap: 8px;
   padding-right: 6px;
+  align-self: flex-start;
 }
 
 .nl-field { display: flex; flex-direction: column; gap: 2px; }
@@ -562,6 +594,14 @@ button.active {
 .nl-btn:disabled { opacity: 0.4; cursor: default; }
 .nl-btn-share { border-color: rgba(120, 150, 120, 0.5); color: #cfe0c8; }
 
+/* Import-Button im Journal-Verzeichnis + Import-Dialog */
+.nl-import-btn { flex: 1 1 100%; }
+.nl-import-dialog fieldset { margin: 0 0 10px; }
+.nl-import-dialog .hint { font-size: 0.8rem; opacity: 0.8; margin: 0 0 6px; }
+.nl-import-dialog select, .nl-import-dialog input[type='file'] { width: 100%; }
+
+.nl-atelier .nl-field-hint { margin: 2px 0 0; font-size: 0.75rem; opacity: 0.7; line-height: 1.3; }
+
 /* ==========================================================================
    Necronolib — Reader (Phase 2/3)
    Buch-Erlebnis: geschlossenes Cover, Aufschlag, Doppelseiten, Papier, CoC7.
@@ -588,9 +628,10 @@ button.active {
 .nl-spacer { flex: 1; }
 .nl-following { opacity: 0.7; }
 
-.nl-share-btn { font-size: 0.75rem; opacity: 0.85; }
+.nl-gm-btn { font-size: 0.75rem; opacity: 0.85; width: auto; flex: none; }
+.nl-gm-btn.active { opacity: 1; }
 
-.nl-share-btn.active {
+.nl-gm-btn.active {
   box-shadow: 0 0 0 1px #b98f2f, 0 0 8px rgba(185, 143, 47, 0.35);
 }
 
@@ -619,6 +660,19 @@ button.active {
 
 .nl-closed .nl-book { width: 260px; height: 355px; }
 
+/* Geschlossenes Buch ist selbst anklickbar (öffnet Seite 1) */
+.nl-book-open-target {
+  cursor: pointer;
+  border-radius: 6px;
+  transition: transform 0.18s ease, filter 0.18s ease;
+  outline: none;
+}
+.nl-book-open-target:hover,
+.nl-book-open-target:focus-visible {
+  transform: translateY(-3px) rotate(-0.4deg);
+  filter: drop-shadow(0 0 10px rgba(185, 143, 47, 0.35));
+}
+
 .nl-open-btn {
   font-size: 0.9rem;
 }
@@ -636,6 +690,13 @@ button.active {
   align-self: center;
   max-width: 100%;
   max-height: 100%;
+  /* Höhe an die Bühne binden: sonst wächst der Spread mit langem Inhalt über
+     die Bühne hinaus und wird oben abgeschnitten (Seiten scrollen stattdessen). */
+  height: 100%;
+  min-height: 0;
+  /* necronolib.css (Atelier-Entwurf) setzt .nl-spread auf align-items: center —
+     hier explizit stretch, damit Seiten Bühnenhöhe haben und intern scrollen. */
+  align-items: stretch;
   aspect-ratio: 3 / 2;
   box-shadow: 0 18px 42px rgba(0, 0, 0, 0.55);
   border-radius: 4px;
@@ -732,7 +793,7 @@ button.active {
 
 .nl-reader button:disabled { opacity: 0.4; cursor: default; }
 
-.nl-share-btn.active {
+.nl-gm-btn.active {
   border-color: #b98f2f;
   box-shadow: 0 0 0 1px #b98f2f, 0 0 8px rgba(185, 143, 47, 0.35);
 }
@@ -780,6 +841,53 @@ button.active {
   margin-bottom: 4px;
 }
 
+/* Seitentitel (Foundry: title.show / title.level; Bild-/Sonderseiten immer) */
+.nl-page-heading {
+  font-family: Georgia, serif;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  margin: 0 0 0.6em;
+  padding-bottom: 0.3em;
+  border-bottom: 1px solid rgba(90, 74, 48, 0.3);
+}
+.nl-page-heading-h1 { font-size: 1.35rem; }
+.nl-page-heading-h2 { font-size: 1.15rem; }
+.nl-page-heading-h3 { font-size: 1rem; }
+
+.nl-page .nl-page-image { margin: 0; text-align: center; }
+.nl-page .nl-page-image figcaption { font-size: 0.8rem; font-style: italic; opacity: 0.75; margin-top: 4px; }
+.nl-page-unsupported { font-style: italic; opacity: 0.6; }
+
+/* GM: SL-only-Umschalter je Seite + Markierung */
+.nl-reader .nl-keeper-toggle {
+  /* sticky: bleibt beim Scrollen langer Seiten sichtbar (.nl-page ist Flex-Spalte) */
+  position: sticky;
+  top: 0;
+  align-self: flex-end;
+  margin: 0 0 -22px 8px;
+  z-index: 1;
+  width: auto;
+  min-width: 26px;
+  height: 22px;
+  line-height: 1;
+  flex: none;
+  padding: 1px 6px;
+  font-size: 0.7rem;
+  opacity: 0.45;
+}
+.nl-reader .nl-keeper-toggle:hover,
+.nl-reader .nl-keeper-toggle.active { opacity: 1; }
+.nl-page.nl-keeper-only {
+  outline: 2px dashed rgba(140, 50, 60, 0.55);
+  outline-offset: -6px;
+}
+
+/* Teilen-Dialog */
+.nl-share-dialog .nl-share-hint { font-size: 0.85rem; opacity: 0.85; margin: 0 0 8px; }
+.nl-share-dialog .nl-share-list { display: flex; flex-direction: column; gap: 4px; max-height: 320px; overflow-y: auto; }
+.nl-share-dialog .nl-share-row { display: flex; align-items: center; gap: 8px; }
+.nl-share-dialog .nl-online { color: #5fb35f; font-size: 0.5rem; }
+
 </style>
 </head>
 <body>
@@ -790,36 +898,45 @@ button.active {
     <span class="nl-reader-pages">Cover</span>
     <span class="nl-spacer"></span>
     
-    <button type="button" class="nl-share-btn active" data-action="toggleShare"
-            title="Geteiltes Lesen: Spieler folgen deinem Umblättern">
-      <i class="fa-solid fa-tower-broadcast"></i>
-      Geteilt
+    <button type="button" class="nl-gm-btn nl-show-btn active" data-action="toggleShow"
+            title="Öffnet das Buch bei allen verbundenen Spielern in der Leseansicht. Sie folgen deinem Umblättern, bis du „Nicht mehr anzeigen“ klickst.">
+      <i class="fa-solid fa-eye-slash"></i>
+      Nicht mehr anzeigen
+    </button>
+    <button type="button" class="nl-gm-btn nl-share-btn active" data-action="shareDialog"
+            title="Gibt ausgewählten Spielern dauerhaften Zugriff über den Notizbuch-Tab — sie öffnen das Buch nur in der Leseansicht.">
+      <i class="fa-solid fa-share-nodes"></i>
+      Geteilt (2)
     </button>
   </header>
 
   <div class="nl-stage">
     <div class="nl-closed">
-      <div class="nl-book"
-           data-nl-book
-           data-material="leather"
-           data-wear="medium"
-           data-clasp="brass"
-           data-thickness="tome"
-           style="--nlc-base:#5a1f24; --nlc-dark:#3d1216; --nlc-light:#7d3539; --nl-wear-o:0.34; --nl-spine-w:40px; --nl-pages-w:18px; --nl-title-size:1.35rem">
-        <div class="nl-pages-edge"></div>
-        <div class="nl-spine-hinge"></div>
-        <div class="nl-wear"></div>
-        <div class="nl-sheen"></div>
-        <div class="nl-title-wrap nl-pos-center">
-          <span class="nl-title nl-font-serif nl-effect-gilt">Cultes des Goules</span>
+      <div class="nl-book-open-target" role="button" tabindex="0" data-action="turnNext"
+           title="Buch öffnen" aria-label="Buch öffnen">
+        <div class="nl-book"
+             data-nl-book
+             data-material="leather"
+             data-wear="medium"
+             data-clasp="brass"
+             data-thickness="tome"
+             style="--nlc-base:#5a1f24; --nlc-dark:#3d1216; --nlc-light:#7d3539; --nl-wear-o:0.34; --nl-spine-w:40px; --nl-pages-w:18px; --nl-title-size:1.35rem">
+          <div class="nl-pages-edge"></div>
+          <div class="nl-spine-hinge"></div>
+          <div class="nl-wear"></div>
+          <div class="nl-sheen"></div>
+          <div class="nl-title-wrap nl-pos-center" data-nl-title-wrap>
+            <span class="nl-title nl-font-serif nl-effect-gilt" data-nl-title >Cultes des Goules</span>
+            <span class="nl-runes" data-nl-runes title="" hidden></span>
+          </div>
+          <div class="nl-clasp nl-clasp-top"></div>
+          <div class="nl-clasp nl-clasp-bottom"></div>
         </div>
-        <div class="nl-clasp nl-clasp-top"></div>
-        <div class="nl-clasp nl-clasp-bottom"></div>
       </div>
       <button type="button" class="nl-open-btn" data-action="turnNext">
         <i class="fa-solid fa-book-open"></i> Buch öffnen
       </button>
-      <p class="nl-open-hint">Zum Aufschlagen weiter blättern →</p>
+      <p class="nl-open-hint">Klicke auf das Buch oder auf „Buch öffnen“.</p>
     </div>
   </div>
 
@@ -866,16 +983,28 @@ button.active {
     <span class="nl-reader-pages">1</span>
     <span class="nl-spacer"></span>
     
-    <button type="button" class="nl-share-btn active" data-action="toggleShare"
-            title="Geteiltes Lesen: Spieler folgen deinem Umblättern">
-      <i class="fa-solid fa-tower-broadcast"></i>
-      Geteilt
+    <button type="button" class="nl-gm-btn nl-show-btn active" data-action="toggleShow"
+            title="Öffnet das Buch bei allen verbundenen Spielern in der Leseansicht. Sie folgen deinem Umblättern, bis du „Nicht mehr anzeigen“ klickst.">
+      <i class="fa-solid fa-eye-slash"></i>
+      Nicht mehr anzeigen
+    </button>
+    <button type="button" class="nl-gm-btn nl-share-btn active" data-action="shareDialog"
+            title="Gibt ausgewählten Spielern dauerhaften Zugriff über den Notizbuch-Tab — sie öffnen das Buch nur in der Leseansicht.">
+      <i class="fa-solid fa-share-nodes"></i>
+      Geteilt (2)
     </button>
   </header>
 
   <div class="nl-stage">
     <div class="nl-spread">
-      <div class="nl-page nl-page-right" data-folio="1"><h1>Cultes des Goules</h1><p><em>par le Comte d’Erlette</em></p><h2>Kapitel 1</h2><p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. (1.1)</p><p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. (1.2)</p><p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. (1.3)</p><p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. (1.4)</p></div>
+        <div class="nl-page nl-page-right " data-folio="1" data-page-id="p1">
+          <button type="button" class="nl-keeper-toggle " data-action="toggleKeeperOnly" data-page-id="p1"
+                  title="Für Spieler sichtbar — klicken, um nur für die Spielleitung zu zeigen">
+            <i class="fa-solid fa-eye"></i>
+          </button>
+          
+          <h1>Cultes des Goules</h1><p><em>par le Comte d’Erlette</em></p><h2>Kapitel 1</h2><p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. (1.1)</p><p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. (1.2)</p><p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. (1.3)</p><p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. (1.4)</p>
+        </div>
     </div>
   </div>
 
@@ -922,17 +1051,36 @@ button.active {
     <span class="nl-reader-pages">2–3</span>
     <span class="nl-spacer"></span>
     
-    <button type="button" class="nl-share-btn active" data-action="toggleShare"
-            title="Geteiltes Lesen: Spieler folgen deinem Umblättern">
-      <i class="fa-solid fa-tower-broadcast"></i>
-      Geteilt
+    <button type="button" class="nl-gm-btn nl-show-btn active" data-action="toggleShow"
+            title="Öffnet das Buch bei allen verbundenen Spielern in der Leseansicht. Sie folgen deinem Umblättern, bis du „Nicht mehr anzeigen“ klickst.">
+      <i class="fa-solid fa-eye-slash"></i>
+      Nicht mehr anzeigen
+    </button>
+    <button type="button" class="nl-gm-btn nl-share-btn active" data-action="shareDialog"
+            title="Gibt ausgewählten Spielern dauerhaften Zugriff über den Notizbuch-Tab — sie öffnen das Buch nur in der Leseansicht.">
+      <i class="fa-solid fa-share-nodes"></i>
+      Geteilt (2)
     </button>
   </header>
 
   <div class="nl-stage">
     <div class="nl-spread">
-      <div class="nl-page nl-page-left" data-folio="2"><h2>Kapitel 2</h2><p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. (2.1)</p><p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. (2.2)</p><p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. (2.3)</p><p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. (2.4)</p></div>
-      <div class="nl-page nl-page-right" data-folio="3"><h2>Kapitel 3</h2><p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. (3.1)</p><p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. (3.2)</p><p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. (3.3)</p><p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. (3.4)</p></div>
+        <div class="nl-page nl-page-left " data-folio="2" data-page-id="p2">
+          <button type="button" class="nl-keeper-toggle " data-action="toggleKeeperOnly" data-page-id="p2"
+                  title="Für Spieler sichtbar — klicken, um nur für die Spielleitung zu zeigen">
+            <i class="fa-solid fa-eye"></i>
+          </button>
+          
+          <h2>Kapitel 2</h2><p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. (2.1)</p><p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. (2.2)</p><p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. (2.3)</p><p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. (2.4)</p>
+        </div>
+        <div class="nl-page nl-page-right nl-keeper-only" data-folio="3" data-page-id="p3">
+          <button type="button" class="nl-keeper-toggle active" data-action="toggleKeeperOnly" data-page-id="p3"
+                  title="Nur Spielleitung — klicken, um für Spieler freizugeben">
+            <i class="fa-solid fa-eye-slash"></i>
+          </button>
+          <div class="nl-page-heading nl-page-heading-h2">Kapitel VII (SL)</div>
+          <h2>Kapitel 3</h2><p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. (3.1)</p><p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. (3.2)</p><p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. (3.3)</p><p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. (3.4)</p>
+        </div>
     </div>
   </div>
 

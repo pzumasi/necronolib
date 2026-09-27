@@ -24,9 +24,10 @@
 .nl-spacer { flex: 1; }
 .nl-following { opacity: 0.7; }
 
-.nl-share-btn { font-size: 0.75rem; opacity: 0.85; }
+.nl-gm-btn { font-size: 0.75rem; opacity: 0.85; width: auto; flex: none; }
+.nl-gm-btn.active { opacity: 1; }
 
-.nl-share-btn.active {
+.nl-gm-btn.active {
   box-shadow: 0 0 0 1px #b98f2f, 0 0 8px rgba(185, 143, 47, 0.35);
 }
 
@@ -55,6 +56,19 @@
 
 .nl-closed .nl-book { width: 260px; height: 355px; }
 
+/* Geschlossenes Buch ist selbst anklickbar (öffnet Seite 1) */
+.nl-book-open-target {
+  cursor: pointer;
+  border-radius: 6px;
+  transition: transform 0.18s ease, filter 0.18s ease;
+  outline: none;
+}
+.nl-book-open-target:hover,
+.nl-book-open-target:focus-visible {
+  transform: translateY(-3px) rotate(-0.4deg);
+  filter: drop-shadow(0 0 10px rgba(185, 143, 47, 0.35));
+}
+
 .nl-open-btn {
   font-size: 0.9rem;
 }
@@ -72,6 +86,13 @@
   align-self: center;
   max-width: 100%;
   max-height: 100%;
+  /* Höhe an die Bühne binden: sonst wächst der Spread mit langem Inhalt über
+     die Bühne hinaus und wird oben abgeschnitten (Seiten scrollen stattdessen). */
+  height: 100%;
+  min-height: 0;
+  /* necronolib.css (Atelier-Entwurf) setzt .nl-spread auf align-items: center —
+     hier explizit stretch, damit Seiten Bühnenhöhe haben und intern scrollen. */
+  align-items: stretch;
   aspect-ratio: 3 / 2;
   box-shadow: 0 18px 42px rgba(0, 0, 0, 0.55);
   border-radius: 4px;
@@ -168,7 +189,7 @@
 
 .nl-reader button:disabled { opacity: 0.4; cursor: default; }
 
-.nl-share-btn.active {
+.nl-gm-btn.active {
   border-color: #b98f2f;
   box-shadow: 0 0 0 1px #b98f2f, 0 0 8px rgba(185, 143, 47, 0.35);
 }
@@ -215,3 +236,50 @@
   opacity: 0.7;
   margin-bottom: 4px;
 }
+
+/* Seitentitel (Foundry: title.show / title.level; Bild-/Sonderseiten immer) */
+.nl-page-heading {
+  font-family: Georgia, serif;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  margin: 0 0 0.6em;
+  padding-bottom: 0.3em;
+  border-bottom: 1px solid rgba(90, 74, 48, 0.3);
+}
+.nl-page-heading-h1 { font-size: 1.35rem; }
+.nl-page-heading-h2 { font-size: 1.15rem; }
+.nl-page-heading-h3 { font-size: 1rem; }
+
+.nl-page .nl-page-image { margin: 0; text-align: center; }
+.nl-page .nl-page-image figcaption { font-size: 0.8rem; font-style: italic; opacity: 0.75; margin-top: 4px; }
+.nl-page-unsupported { font-style: italic; opacity: 0.6; }
+
+/* GM: SL-only-Umschalter je Seite + Markierung */
+.nl-reader .nl-keeper-toggle {
+  /* sticky: bleibt beim Scrollen langer Seiten sichtbar (.nl-page ist Flex-Spalte) */
+  position: sticky;
+  top: 0;
+  align-self: flex-end;
+  margin: 0 0 -22px 8px;
+  z-index: 1;
+  width: auto;
+  min-width: 26px;
+  height: 22px;
+  line-height: 1;
+  flex: none;
+  padding: 1px 6px;
+  font-size: 0.7rem;
+  opacity: 0.45;
+}
+.nl-reader .nl-keeper-toggle:hover,
+.nl-reader .nl-keeper-toggle.active { opacity: 1; }
+.nl-page.nl-keeper-only {
+  outline: 2px dashed rgba(140, 50, 60, 0.55);
+  outline-offset: -6px;
+}
+
+/* Teilen-Dialog */
+.nl-share-dialog .nl-share-hint { font-size: 0.85rem; opacity: 0.85; margin: 0 0 8px; }
+.nl-share-dialog .nl-share-list { display: flex; flex-direction: column; gap: 4px; max-height: 320px; overflow-y: auto; }
+.nl-share-dialog .nl-share-row { display: flex; align-items: center; gap: 8px; }
+.nl-share-dialog .nl-online { color: #5fb35f; font-size: 0.5rem; }

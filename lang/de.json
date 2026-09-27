@@ -6,7 +6,11 @@
       "Save": "Speichern",
       "Reset": "Zurücksetzen",
       "Saved": "Cover für „{journal}“ gespeichert.",
-      "RunesHint": "Ohne Titel: prozedurale Runen"
+      "RunesHint": "Ohne Titel: prozedurale Runen",
+      "SaveFailed": "Speichern fehlgeschlagen — Details in der Konsole.",
+      "Revert": "Verwerfen",
+      "RevertTitle": "Ungespeicherte Änderungen verwerfen (gespeicherten Stand laden)",
+      "ResetTitle": "Alle Felder auf Standardwerte setzen (noch nicht gespeichert)"
     },
     "Field": {
       "Material": "Material",
@@ -49,7 +53,7 @@
       "TitleFont": {
         "serif": "Serif (klassisch)",
         "sans": "Seriflos (nüchtern)",
-        "runes": "Runen (monospace)"
+        "runes": "Runen (Da Rune)"
       },
       "TitleEffect": {
         "gilt": "Vergoldung",
@@ -90,7 +94,9 @@
     },
     "Context": {
       "DesignCover": "Buch-Cover gestalten",
-      "ReadBook": "Buch lesen"
+      "ReadBook": "Buch lesen",
+      "ShareBook": "Buch teilen …",
+      "ExportBook": "Als Necronolib-Buch exportieren"
     },
     "Warn": {
       "GmOnly": "Nur die Spielleitung kann das Atelier öffnen.",
@@ -101,15 +107,30 @@
       "Cover": "Cover",
       "Empty": "Dieses Buch hat noch keine Seiten.",
       "OpenButton": "Buch öffnen",
-      "OpenHint": "Zum Aufschlagen weiter blättern →",
+      "OpenHint": "Klicke auf das Buch oder auf „Buch öffnen“.",
       "Prev": "Zurück",
       "Next": "Weiter",
-      "Share": "Vorlesen",
-      "Sharing": "Geteilt",
-      "ShareTitle": "Geteiltes Lesen: Spieler folgen deinem Umblättern",
-      "SharedOn": "Geteiltes Lesen für „{journal}“ aktiviert.",
-      "SharedOff": "Geteiltes Lesen beendet.",
-      "RunesHint": "Okkulte Runen"
+      "Share": "Teilen",
+      "ShareTitle": "Gibt ausgewählten Spielern dauerhaften Zugriff über den Notizbuch-Tab — sie öffnen das Buch nur in der Leseansicht.",
+      "RunesHint": "Okkulte Runen",
+      "Unsupported": "Dieser Seitentyp wird im Buch nicht dargestellt — bitte im Journal öffnen.",
+      "KeeperOnlyOn": "Nur Spielleitung — klicken, um für Spieler freizugeben",
+      "KeeperOnlyOff": "Für Spieler sichtbar — klicken, um nur für die Spielleitung zu zeigen",
+      "Following": "Du folgst dem Vorlesen der Spielleitung",
+      "Show": "Anzeigen",
+      "Unshow": "Nicht mehr anzeigen",
+      "ShowTitle": "Öffnet das Buch bei allen verbundenen Spielern in der Leseansicht. Sie folgen deinem Umblättern, bis du „Nicht mehr anzeigen“ klickst.",
+      "ShowOn": "„{journal}“ wird den verbundenen Spielern angezeigt.",
+      "ShowOff": "„{journal}“ wird nicht mehr angezeigt.",
+      "ShowNoPlayers": "Keine Spieler verbunden — das Buch öffnet sich bei Spielern, die jetzt online sind.",
+      "MissingAccessTitle": "Fehlende Leserechte",
+      "MissingAccess": "Diesen verbundenen Spielern fehlen Leserechte: {names}. Buch mit ihnen teilen (dauerhaft, nur Leseansicht)?",
+      "SharedCount": "Geteilt ({count})",
+      "ShareDialogTitle": "Buch teilen: {journal}",
+      "ShareDialogHint": "Ausgewählte Spieler sehen das Buch dauerhaft im Notizbuch-Tab und öffnen es nur in der Leseansicht. Abwählen entzieht den Zugriff wieder.",
+      "ShareNoPlayers": "Es gibt keine Spieler-Accounts.",
+      "ShareApply": "Übernehmen",
+      "ShareSaved": "Freigabe für „{journal}“ aktualisiert ({count} Spieler)."
     },
     "Coc7": {
       "Mythos": "Mythos-Buch",
@@ -123,6 +144,30 @@
       "Reference": "Nachschlagen",
       "ReferenceTitle": "Als Mythos-Referenz nutzen (CoC7, 1W4)",
       "ApiUnavailable": "CoC7-Mechanik nicht verfügbar — System prüfen."
+    },
+    "Io": {
+      "ImportTitle": "Necronolib — Buch importieren",
+      "ImportButton": "Importieren",
+      "ImportButtonShort": "Buch importieren",
+      "FromFile": "Aus Datei",
+      "FromFileHint": "Necronolib-Buch (*.necronolib.json).",
+      "FromFileHintCoc7": "Necronolib-Buch (*.necronolib.json) oder exportiertes CoC7-Buch-Item (JSON, type „book“).",
+      "FromCoc7": "Aus CoC7-Buch erstellen",
+      "FromCoc7Hint": "Legt ein Buch mit Beschreibung + SL-Notizen an und verknüpft es. Kompendium-Bücher werden dafür in die Welt importiert.",
+      "NoCoc7Books": "Keine CoC7-Buch-Items in Welt oder Kompendien gefunden.",
+      "GroupWorld": "Welt",
+      "NothingSelected": "Bitte eine Datei oder ein CoC7-Buch wählen.",
+      "NotJson": "Die Datei ist kein gültiges JSON.",
+      "UnknownFormat": "Unbekanntes Format — erwartet Necronolib-Buch oder CoC7-Buch-Item.",
+      "Invalid": "Import abgelehnt: {errors}",
+      "NeedsCoc7": "Dafür muss das CoC7-System aktiv sein.",
+      "LinkNotFound": "CoC7-Buch „{name}“ nicht gefunden — Buch ohne Verknüpfung importiert.",
+      "Imported": "„{journal}“ importiert ({pages} Seiten, {warnings} Hinweise — siehe Konsole).",
+      "CreatedFromCoc7": "Buch „{journal}“ aus CoC7-Item erstellt und verknüpft.",
+      "Exported": "„{journal}“ exportiert.",
+      "PageDescription": "Beschreibung",
+      "PageKeeper": "SL-Notizen",
+      "PageContent": "Inhalt"
     }
   }
 }

@@ -10,8 +10,7 @@ const css = readFileSync('styles/necronolib.css', 'utf8');
 const partialSrc = readFileSync('templates/partials/book.hbs', 'utf8');
 Handlebars.registerPartial('book', Handlebars.compile(partialSrc));
 
-/** Zwei Helper, die atelier.hbs nutzt — hier für die Matrix registrieren. */
-Handlebars.registerHelper('selected', (a, b) => (a === b ? 'selected' : ''));
+/** Nur localize registrieren — wie in Foundry v14 (kein 'selected'-Helper). */
 Handlebars.registerHelper('localize', (key) => key);
 
 import { coverVars, runesFor } from '../src/cover/model.mjs';
@@ -53,4 +52,4 @@ ${cards}
 </html>`;
 
 writeFileSync('tools/preview.html', page);
-console.log('tools/preview.html geschrieben,', cards.length, 'Cover-Kombinationen');
+console.log('tools/preview.html geschrieben,', combos.length, 'Cover-Kombinationen');

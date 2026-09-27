@@ -1,0 +1,56 @@
+name: Release
+
+# Veröffentlicht module.json + necronolib.zip als GitHub-Release v<version aus module.json>.
+# Auslöser: Tag-Push v*, manuell (workflow_dispatch) oder Push, der module.json/den Workflow ändert.
+# Existiert das Release zur Version schon, passiert nichts (idempotent). Der Tag wird bei Bedarf
+# von der Action auf dem gebauten Commit angelegt.
+# Foundry-Manifest-URL: https://github.com/pzumasi/necronolib/releases/latest/download/module.json
+on:
+  push:
+    tags: ['v*']
+    branches: ['main', 'claude/**']
+    paths: ['module.json', 'fonts/**', '.github/workflows/release.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Version aus module.json
+        id: v
+        run: echo "tag=v$(node -p "require('./module.json').version")" >> "$GITHUB_OUTPUT"
+      - name: Existiert das Release schon?
+        id: exists
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "${{ steps.v.outputs.tag }}" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"; echo "Release ${{ steps.v.outputs.tag }} existiert — nichts zu tun."
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+      - if: steps.exists.outputs.skip == 'false'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - if: steps.exists.outputs.skip == 'false'
+        run: npm ci
+      - if: steps.exists.outputs.skip == 'false'
+        run: npm test
+      - if: steps.exists.outputs.skip == 'false'
+        run: node tools/build-zip.mjs "${{ steps.v.outputs.tag }}"
+      - if: steps.exists.outputs.skip == 'false'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.v.outputs.tag }}
+          target_commitish: ${{ github.sha }}
+          name: ${{ steps.v.outputs.tag }}
+          body_path: RELEASE_NOTES.md
+          make_latest: 'true'
+          files: |
+            dist/module.json
+            dist/necronolib.zip

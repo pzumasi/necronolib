@@ -70,6 +70,55 @@ JournalEntry (foundry-nativ)
 - [x] GitHub-Release v0.1.0 mit Zip + module.json (privates Repo → Installation manuell)
 - [ ] Installation auf Foundry-Host + Testwelt-Spike (User)
 
+## Review 2026-09-27 (Bugs · Sicherheit · Features)
+
+**Bugs (gefixt)**
+- `module.json` ohne `"socket": true` → Vorlesen/Socket-Sync ging nie über den Modul-Kanal (Bindery-Manifest nutzt das Flag, siehe `docs/recherche-bindery.md`; socketlib-Doku verlangt es ebenso)
+- Kontextmenü-Hook `getJournalEntryContext` existiert seit v13 nicht mehr → Einträge „Buch lesen“/„Cover gestalten“ fehlten; jetzt `getJournalEntryContextOptions` mit v14-Feldern `label/visible/onClick` (foundryvtt/foundryvtt#12335)
+- Atelier: Feld-Listener wurden erst nach dem *zweiten* Render gesetzt (Live-Vorschau beim ersten Öffnen tot) → `_onRender`
+- Live-Vorschau: `applyCover` suchte `[data-nl-title]` (fehlte im Partial) und setzte data-Attribute, CSS nutzt aber Klassen → Titel/Schrift/Effekt/Position änderten sich nicht; Titel ↔ Runen jetzt per `hidden`-Toggle
+- Seitenreihenfolge ignorierte `page.sort`
+- `clampSpread` lieferte `NaN` bei nicht-numerischen Socket-Werten
+- Layout: zweite `.nl-spread`-Regel (necronolib.css, `align-items: center`) ließ lange Seiten über die Bühne wachsen → oberer Text abgeschnitten, nicht scrollbar
+- Atelier: Verknüpfung auf Actor-Buch fehlte im Dropdown → Speichern löste sie stillschweigend; Speichern jetzt als *ein* Update
+- Stale Instanzen: Reader/Atelier-Map wird beim Schließen bereinigt (ungespeicherte Atelier-Änderungen überlebten Schließen)
+
+**Sicherheit (gehärtet)**
+- Reader zeigte Spielern Seiten ohne OBSERVER-Recht und `<section class="secret">`-Blöcke → Seitenrechte-Filter + `TextEditor.enrichHTML({secrets: page.isOwner})`
+- Socket: nur Events von GM-Usern werden befolgt; `spread`/`share` typgeprüft. Hinweis: Modul-Sockets liefern keine server-authentifizierte Absender-ID (fbl-vn PR #4), `by` ist spoofbar — Auswirkung auf Umblättern begrenzt, Inhalte immer lokal nach eigenen Rechten gefiltert
+- CoC7-Link: nur auf existierende `book`-Items speicherbar; CoC7-Aktionen zusätzlich GM-geprüft
+
+**Features (neu)**
+- SL-only-Umschalter je Seite im Reader (Flag `flags.necronolib.keeperOnly` an der JournalEntryPage)
+- Vorlesen öffnet den Reader bei berechtigten Spielern automatisch; „Vorlesen aus“/Schließen beendet das Folgen
+- Reader aktualisiert sich live bei Journal-/Seitenänderungen; schließt bei Journal-Löschung
+- Pfeiltasten/Bild↑↓ zum Blättern; Bild-Seiten (mit Bildunterschrift) + Seitentitel (`title.show/level`); Hinweis für nicht unterstützte Seitentypen
+- Atelier: „Verwerfen“ (gespeicherten Stand laden), Titel live beim Tippen, Fenstertitel mit Journalnamen
+- Tests 38 → 51: Manifest/i18n-Parität/alle genutzten Lang-Keys/Template-Kompilierung, Pagination, Socket-Guards, Live-Toggle
+
+**Offen (bewusst nicht angefasst)**
+- necronolib.css enthält alte Reader-Regeln aus dem Parallel-Entwurf (`.nl-spread-pages`, `.nl-page[data-side]` …) — tot, aber Aufräumen erst nach Foundry-Spike
+- Alles oben ist nur per Node-Tests + Preview-Harness verifiziert, **nicht in echtem Foundry v14** (Host-Spike steht aus)
+
+## Release v0.2.0 (27.09.2026)
+- version 0.2.0, download-URL auf v0.2.0; `npm run build` (tools/build-zip.mjs: Manifest-/Import-/Tag-Check, 18 Dateien)
+- Release per GitHub Action bei Versionsänderung in module.json (Push), Tag-Push `v*` oder manuell; idempotent (`.github/workflows/release.yml`, Assets module.json + necronolib.zip, Text aus RELEASE_NOTES.md)
+- Tag v0.2.0 zeigt auf den Branch `claude/adoring-tesla-6vg29k` (main noch nicht gemergt)
+- Nächster Schritt (User): Repo öffentlich → Manifest-Install in Foundry v14 → Host-Test
+
+## Hotfix v0.2.1 (27.09.2026) — erster Live-Test Foundry v14
+- Live-Test User: „Buch lesen“ funktioniert; „Cover gestalten“ warf `Missing helper: "selected"` → Helper existiert in v14 nicht
+- Fix: selected-Flag in den Options-Objekten (atelier.mjs), Template ohne Helper; Regressionstest (knownHelpersOnly + Render)
+- Lehre: Preview-Harnesses dürfen keine Helper registrieren, die Foundry nicht hat
+
+## v0.3.0 (27.09.2026) — Feedback aus dem Live-Test
+- Atelier: Foundry stylt `.window-content` als Flex-Spalte (höhere Spezifität) → Layout in eigenes `.nl-atelier-body`; Fenster 860×640, Body scrollt, Vorschau 290×400 zentriert
+- Runenschrift „Da Rune“ (Daniel Riantsoatahina) gebündelt — Lizenz dafont „free for personal use“, **Erlaubnis des Autors vom User eingeholt** (27.09.2026), Attribution in `fonts/README.md`, README, CSS
+- Reader: geschlossenes Buch klickbar (+ Enter/Leertaste), Hinweistext neu
+- SL-Buttons neu definiert: **Anzeigen** (verbundene Spieler, Leseansicht, folgen Umblättern; Socket-Aktion `show`, ersetzt `share`) und **Teilen** (Dialog mit Checkboxen, OBSERVER + `flags.necronolib.share.users`, Leseansicht-Zwang via Patch von `JournalEntrySheet/PageSheet.render`)
+- Import/Export: Format `necronolib-book` v1 (`src/io/book-format.mjs`), Foundry-Teil `scripts/io.mjs`, Skill `.claude/skills/necronolib-book-import/SKILL.md`, Validator `npm run validate`, Beispiel `docs/examples/`
+- Offen/ungetestet live: Sheet-Umleitung (Klassennamen v14), DialogV2-Formzugriff, `recursive:false`-Ownership-Update, Showdown-Global für Markdown
+
 ## Risiken & Offenpunkte
 
 - **v14-AppV2/Sockets**: Socket-Muster in Testwelt spike-testen, bevor Phase 2 voll ausgebaut wird
