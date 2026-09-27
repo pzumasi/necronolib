@@ -12,27 +12,9 @@ Handlebars.registerPartial('book', Handlebars.compile(readFileSync('templates/pa
 Handlebars.registerPartial('modules/necronolib/templates/partials/book.hbs', Handlebars.partials.book);
 const readerSrc = readFileSync('templates/reader.hbs', 'utf8');
 
-Handlebars.registerHelper('localize', (key) => ({
-  'NECRONOLIB.Reader.Cover': 'Cover',
-  'NECRONOLIB.Reader.Empty': 'Dieses Buch hat noch keine Seiten.',
-  'NECRONOLIB.Reader.OpenButton': 'Buch öffnen',
-  'NECRONOLIB.Reader.OpenHint': 'Zum Aufschlagen weiter blättern →',
-  'NECRONOLIB.Reader.Prev': 'Zurück',
-  'NECRONOLIB.Reader.Next': 'Weiter',
-  'NECRONOLIB.Reader.Share': 'Vorlesen',
-  'NECRONOLIB.Reader.Sharing': 'Geteilt',
-  'NECRONOLIB.Reader.ShareTitle': 'Geteiltes Lesen: Spieler folgen deinem Umblättern',
-  'NECRONOLIB.Coc7.Mythos': 'Mythos-Buch',
-  'NECRONOLIB.Coc7.Occult': 'Okkultes Buch',
-  'NECRONOLIB.Coc7.SanLoss': 'STA-Verlust',
-  'NECRONOLIB.Coc7.MythosRating': 'Mythos-Wert',
-  'NECRONOLIB.Coc7.Study': 'Studium (Wochen)',
-  'NECRONOLIB.Coc7.KeeperNotes': 'Spielleitungs-Notizen',
-  'NECRONOLIB.Coc7.InitialReading': 'Erstleseversuch',
-  'NECRONOLIB.Coc7.InitialReadingTitle': 'Sprach-Probe auf Erstlesung (CoC7)',
-  'NECRONOLIB.Coc7.Reference': 'Nachschlagen',
-  'NECRONOLIB.Coc7.ReferenceTitle': 'Als Mythos-Referenz nutzen (CoC7, 1W4)'
-}[key] ?? key));
+// Echte Übersetzungen aus lang/de.json (verschachtelt → Punkt-Pfad).
+const de = JSON.parse(readFileSync('lang/de.json', 'utf8'));
+Handlebars.registerHelper('localize', (key) => String(key).split('.').reduce((o, k) => o?.[k], de) ?? key);
 Handlebars.registerHelper('selected', (a, b) => (a === b ? 'selected' : ''));
 
 import { coverVars, runesFor } from '../src/cover/model.mjs';
@@ -49,7 +31,7 @@ const coc7 = {
   studyWeeks: 12, isMythos: true, isOccult: false
 };
 
-const p = (n, html) => ({ text: { content: html }, flags: {} });
+const p = (n, html, extra = {}) => ({ id: `p${n}`, name: `Seite ${n}`, folio: n, html, showTitle: false, titleTag: 'h2', keeperOnly: false, ...extra });
 const lorem = (n) => `<h2>Kapitel ${n}</h2>` + Array.from({ length: 4 }, (_, i) =>
   `<p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. (${n}.${i + 1})</p>`).join('');
 
@@ -67,8 +49,8 @@ const base = {
 const compile = Handlebars.compile(readerSrc);
 const states = [
   { title: 'Geschlossen (Cover)', ctx: { ...base, isClosed: true, hasPages: true, label: 'Cover', isFirst: true, isLast: false, current: null } },
-  { title: 'Aufschlag (Seite 1)', ctx: { ...base, isClosed: false, hasPages: true, label: '1', isFirst: true, isLast: false, current: { left: null, right: p(1, `<h1>Cultes des Goules</h1><p><em>par le Comte d’Erlette</em></p>${lorem(1)}`), leftNo: null, rightNo: 1 } } },
-  { title: 'Doppelseite (2–3)', ctx: { ...base, isClosed: false, hasPages: true, label: '2–3', isFirst: false, isLast: false, current: { left: p(2, lorem(2)), right: p(3, lorem(3)), leftNo: 2, rightNo: 3 } } }
+  { title: 'Aufschlag (Seite 1)', ctx: { ...base, isClosed: false, hasPages: true, label: '1', isFirst: true, isLast: false, current: { left: null, right: p(1, `<h1>Cultes des Goules</h1><p><em>par le Comte d’Erlette</em></p>${lorem(1)}`) } } },
+  { title: 'Doppelseite (2–3)', ctx: { ...base, isClosed: false, hasPages: true, label: '2–3', isFirst: false, isLast: false, current: { left: p(2, lorem(2)), right: p(3, lorem(3), { keeperOnly: true, showTitle: true, name: 'Kapitel VII (SL)' }) } } }
 ];
 
 const cards = states.map(({ title, ctx }) =>

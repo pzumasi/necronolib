@@ -32,6 +32,7 @@
       "path": "lang/en.json"
     }
   ],
+  "socket": true,
   "relationships": {
     "systems": [
       {

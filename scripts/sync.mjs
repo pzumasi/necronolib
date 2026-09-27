@@ -8,7 +8,7 @@
 export const SOCKET_SCOPE = 'module.necronolib';
 
 /**
- * Reader-Ereignis an alle Clients senden.
+ * Reader-Ereignis an alle anderen Clients senden.
  * @param {{action: 'goto'|'share', journalId?: string, journalUuid: string,
  *          spread?: number, share?: boolean, by?: string}} payload
  */
@@ -28,7 +28,8 @@ export function onSocket(handler) {
 /**
  * Guard für Reader-Nachrichten (reine Validierung, testbar).
  * Härtung: journalUuid muss mit "JournalEntry." beginnen (verhindert
- * fremde/manipulierte Events auf dem Kanal).
+ * fremde/manipulierte Events auf dem Kanal); spread muss – falls gesetzt –
+ * eine ganze Zahl ≥ -1 sein; share – falls gesetzt – ein Boolean.
  * @returns {boolean} true wenn payload ein gültiges Reader-Event ist
  */
 export function isReaderEvent(data) {
@@ -38,5 +39,22 @@ export function isReaderEvent(data) {
     && (data.action === 'goto' || data.action === 'share')
     && typeof data.journalUuid === 'string'
     && data.journalUuid.startsWith('JournalEntry.')
+    && (data.spread === undefined || (Number.isInteger(data.spread) && data.spread >= -1))
+    && (data.share === undefined || typeof data.share === 'boolean')
   );
+}
+
+/**
+ * Stammt das Event (laut `by`) von einem GM?
+ * Hinweis: Foundry-Modul-Sockets liefern keine server-authentifizierte
+ * Absender-ID; `by` ist client-seitig gesetzt. Der Check verhindert
+ * versehentliche/naive Fremdsteuerung durch Spieler-Clients, ist aber keine
+ * kryptografische Garantie. Die Auswirkung ist auf Umblättern begrenzt;
+ * Seiteninhalte werden immer lokal nach eigenen Rechten gefiltert.
+ * @param {object} data Reader-Event
+ * @param {{get: (id: string) => ({isGM?: boolean}|undefined)}} users z. B. game.users
+ */
+export function isFromGM(data, users) {
+  if (typeof data?.by !== 'string' || !data.by) return false;
+  return Boolean(users?.get?.(data.by)?.isGM);
 }

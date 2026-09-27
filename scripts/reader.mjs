@@ -1,18 +1,26 @@
 /**
  * Necronolib — Reader (MVP-Kern).
  * Immersives Buch: geschlossenes Cover → Aufschlag → Doppelseiten aus
- * JournalEntryPages; Umblättern, geteiltes Lesen via Socket, GM-only-Seiten,
- * CoC7-Anzeige + Mechanik-Delegation (Erstlesung/Nachschlagen).
+ * JournalEntryPages; Umblättern (Buttons + Pfeiltasten), geteiltes Lesen via
+ * Socket, GM-only-Seiten, CoC7-Anzeige + Mechanik-Delegation (Erstlesung/Nachschlagen).
  */
-import { getBookFlags, getLinkFlags, coverContext } from './schema.mjs';
+import { getLinkFlags, coverContext } from './schema.mjs';
 import { visiblePages, buildSpreads, clampSpread, spreadLabel } from '../src/reader/pagination.mjs';
 import { isCoC7, bookStats, keeperHtml } from './coc7.mjs';
-import { emitReaderEvent, isReaderEvent } from './sync.mjs';
+import { emitReaderEvent, isReaderEvent, isFromGM } from './sync.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
-/** Offene Reader je Journal. */
+/** Offene Reader je Journal-UUID (nur gerenderte; Eintrag fällt beim Schließen weg). */
 const OPEN = new Map();
+
+/** HTML-Escape für Attribut-/Textwerte, die wir selbst in Markup setzen. */
+const escapeHtml = (s) => String(s ?? '').replace(/[&<>"']/g, (ch) => ({
+  '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+}[ch]));
+
+/** v13+: TextEditor liegt im Namespace; globaler Alias warnt in v14. */
+const textEditor = () => foundry.applications?.ux?.TextEditor?.implementation ?? globalThis.TextEditor;
 
 export class NecronolibReader extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @param {JournalEntry} journal */
@@ -21,8 +29,6 @@ export class NecronolibReader extends HandlebarsApplicationMixin(ApplicationV2) 
     this.#journal = journal;
     // -1 = geschlossenes Cover (nur wenn Cover konfiguriert), sonst 0.
     this.#spread = this.#hasCover() ? -1 : 0;
-    this.#sharing = false;
-    this.#following = false;
   }
 
   #journal;
@@ -43,6 +49,7 @@ export class NecronolibReader extends HandlebarsApplicationMixin(ApplicationV2) 
       turnPrev: NecronolibReader.#turnPrev,
       turnNext: NecronolibReader.#turnNext,
       toggleShare: NecronolibReader.#toggleShare,
+      toggleKeeperOnly: NecronolibReader.#toggleKeeperOnly,
       coc7InitialReading: NecronolibReader.#coc7InitialReading,
       coc7Reference: NecronolibReader.#coc7Reference
     }
@@ -55,18 +62,29 @@ export class NecronolibReader extends HandlebarsApplicationMixin(ApplicationV2) 
     }
   };
 
+  /** Reader für ein Journal öffnen (Singleton je Journal). */
   static open(journal) {
-    const key = journal?.uuid ?? String(journal?.id);
+    const key = journal?.uuid;
     if (!key) return null;
     let app = OPEN.get(key);
     if (!app) {
       app = new NecronolibReader(journal);
       OPEN.set(key, app);
-      app.render(true);
-    } else {
-      app.render(true);
     }
+    app.render({ force: true });
     return app;
+  }
+
+  /** Offener Reader für eine Journal-UUID (oder undefined). */
+  static get(journalUuid) {
+    return OPEN.get(journalUuid);
+  }
+
+  get journal() { return this.#journal; }
+
+  /** Fenstertitel mit Buchnamen statt generischem Titel. */
+  get title() {
+    return `${game.i18n.localize(this.options.window.title)}: ${this.#journal.name}`;
   }
 
   #hasCover() {
@@ -74,7 +92,12 @@ export class NecronolibReader extends HandlebarsApplicationMixin(ApplicationV2) 
   }
 
   #pages() {
-    return visiblePages(this.#journal.pages?.contents ?? [], { isGM: game.user.isGM });
+    const user = game.user;
+    return visiblePages(this.#journal.pages?.contents ?? [], {
+      isGM: user.isGM,
+      // Foundry-Seitenrechte respektieren: Spieler sehen nur Seiten mit OBSERVER.
+      canView: (p) => (typeof p.testUserPermission === 'function' ? p.testUserPermission(user, 'OBSERVER') : true)
+    });
   }
 
   #spreads() {
@@ -82,9 +105,9 @@ export class NecronolibReader extends HandlebarsApplicationMixin(ApplicationV2) 
   }
 
   /** Klemmt inkl. geschlossenem Zustand (-1). */
-  #clamp(index) {
+  #clamp(index, spreads = this.#spreads()) {
     if (this.#hasCover() && index === -1) return -1;
-    return clampSpread(index, this.#spreads().length);
+    return clampSpread(index, spreads.length);
   }
 
   /** Socket-Follow: Sprung von außen (SL teilt). */
@@ -96,19 +119,66 @@ export class NecronolibReader extends HandlebarsApplicationMixin(ApplicationV2) 
     return true;
   }
 
+  /** Socket: SL hat das Vorlesen beendet. */
+  unfollow() {
+    if (!this.#following) return;
+    this.#following = false;
+    this.render();
+  }
+
+  /** Eine Seite für die Anzeige aufbereiten (Rechte, Secrets, Seitentyp). */
+  async #pageView(page, folio) {
+    if (!page) return null;
+    let html = '';
+    switch (page.type) {
+      case 'text':
+        // Secrets nur für Seiten-Besitzer, wie im Foundry-Journal selbst.
+        html = await textEditor().enrichHTML(page.text?.content ?? '', {
+          secrets: Boolean(page.isOwner),
+          relativeTo: page
+        });
+        break;
+      case 'image':
+        if (page.src) {
+          const caption = page.image?.caption ? `<figcaption>${escapeHtml(page.image.caption)}</figcaption>` : '';
+          html = `<figure class="nl-page-image"><img src="${escapeHtml(page.src)}" alt="${escapeHtml(page.name)}">${caption}</figure>`;
+        }
+        break;
+      default:
+        html = `<p class="nl-page-unsupported">${escapeHtml(game.i18n.localize('NECRONOLIB.Reader.Unsupported'))}</p>`;
+    }
+    const level = Math.min(Math.max(Number(page.title?.level) || 1, 1), 3);
+    return {
+      id: page.id,
+      name: page.name,
+      folio,
+      html,
+      showTitle: Boolean(page.title?.show) || page.type !== 'text',
+      titleTag: `h${level}`,
+      keeperOnly: Boolean(page.flags?.necronolib?.keeperOnly)
+    };
+  }
+
   async _prepareContext() {
     const spreads = this.#spreads();
-    this.#spread = this.#clamp(this.#spread);
+    this.#spread = this.#clamp(this.#spread, spreads);
     const current = this.#spread >= 0 ? (spreads[this.#spread] ?? null) : null;
+    const view = current
+      ? {
+        left: await this.#pageView(current.left, current.leftNo),
+        right: await this.#pageView(current.right, current.rightNo)
+      }
+      : null;
     const link = getLinkFlags(this.#journal);
     const item = isCoC7(game) ? await fromUuidSafe(link.coc7BookUuid) : null;
     const coc7 = item ? bookStats(item) : null;
     const canAct = Boolean(coc7 && game.user.isGM && (item?.actor ?? item?.parent?.actor));
+    const keeper = game.user.isGM ? keeperHtml(item) : '';
     return {
       journal: { id: this.#journal.id, uuid: this.#journal.uuid, name: this.#journal.name },
       cover: coverContext(this.#journal),
       isClosed: this.#spread === -1,
-      current,
+      current: view,
       label: this.#spread === -1
         ? game.i18n.localize('NECRONOLIB.Reader.Cover')
         : spreadLabel(current),
@@ -120,8 +190,29 @@ export class NecronolibReader extends HandlebarsApplicationMixin(ApplicationV2) 
       isGM: game.user.isGM,
       coc7,
       coc7CanAct: canAct,
-      keeperHtml: game.user.isGM ? keeperHtml(item) : ''
+      keeperHtml: keeper ? await textEditor().enrichHTML(keeper, { secrets: true, relativeTo: item }) : ''
     };
+  }
+
+  /** Pfeiltasten/Bild-Tasten blättern (nicht in Eingabefeldern). */
+  async _onFirstRender(context, options) {
+    await super._onFirstRender?.(context, options);
+    this.element.tabIndex = -1;
+    this.element.addEventListener('keydown', (event) => {
+      if (event.target?.closest?.('input, textarea, select, [contenteditable="true"]')) return;
+      if (event.key === 'ArrowLeft' || event.key === 'PageUp') { event.preventDefault(); this.#turn(-1); }
+      if (event.key === 'ArrowRight' || event.key === 'PageDown') { event.preventDefault(); this.#turn(+1); }
+    });
+  }
+
+  async _onClose(options) {
+    await super._onClose?.(options);
+    // Vorlesen beenden, damit Spieler nicht an einem geschlossenen Buch hängen.
+    if (this.#sharing && game.user.isGM) {
+      this.#sharing = false;
+      emitReaderEvent({ action: 'share', journalId: this.#journal.id, journalUuid: this.#journal.uuid, share: false });
+    }
+    if (OPEN.get(this.#journal.uuid) === this) OPEN.delete(this.#journal.uuid);
   }
 
   #turn(delta) {
@@ -164,8 +255,18 @@ export class NecronolibReader extends HandlebarsApplicationMixin(ApplicationV2) 
     this.render();
   }
 
+  /** GM: Seite als SL-only markieren/freigeben (flags.necronolib.keeperOnly). */
+  static async #toggleKeeperOnly(_event, target) {
+    if (!game.user.isGM) return;
+    const page = this.#journal.pages?.get(target?.dataset?.pageId);
+    if (!page) return;
+    const next = !page.flags?.necronolib?.keeperOnly;
+    await page.setFlag('necronolib', 'keeperOnly', next);
+  }
+
   /** CoC7-Mechanik: Erstlesung — delegiert an das System (item.system). */
   static async #coc7InitialReading() {
+    if (!game.user.isGM) return;
     const item = await this.#linkedItem();
     try {
       await item.system.attemptInitialReading();
@@ -177,6 +278,7 @@ export class NecronolibReader extends HandlebarsApplicationMixin(ApplicationV2) 
 
   /** CoC7-Mechanik: Mythos-Referenz (1W4) — delegiert an das System. */
   static async #coc7Reference() {
+    if (!game.user.isGM) return;
     const item = await this.#linkedItem();
     try {
       await item.system.attemptReference();
@@ -202,11 +304,40 @@ async function fromUuidSafe(uuid) {
   }
 }
 
-/** Socket-Dispatcher (im Entry registriert). */
-export function handleSocket(data) {
+/**
+ * Offene Reader nach Journal-/Seitenänderungen neu rendern (Hooks im Entry).
+ * @param {JournalEntry|null|undefined} journal
+ * @param {{deleted?: boolean}} opts
+ */
+export function refreshReaders(journal, { deleted = false } = {}) {
+  const app = journal?.uuid ? OPEN.get(journal.uuid) : null;
+  if (!app) return;
+  if (deleted) app.close();
+  else if (app.rendered) app.render();
+}
+
+/**
+ * Socket-Dispatcher (im Entry registriert).
+ * Akzeptiert nur Events von GM-Usern; „share" öffnet den Reader bei Spielern
+ * automatisch (sofern Leserechte), „share: false" beendet das Folgen.
+ */
+export async function handleSocket(data) {
   if (!isReaderEvent(data)) return;
   if (data.by === game.user?.id) return; // eigenes Echo ignorieren
-  const app = OPEN.get(data.journalUuid);
+  if (!isFromGM(data, game.users)) return;
+  let app = OPEN.get(data.journalUuid);
+
+  if (data.action === 'share' && data.share === false) {
+    app?.unfollow();
+    return;
+  }
+
+  if (!app && data.action === 'share' && data.share === true) {
+    const journal = await fromUuidSafe(data.journalUuid);
+    if (!journal || journal.documentName !== 'JournalEntry') return;
+    if (!journal.testUserPermission(game.user, 'LIMITED')) return;
+    app = NecronolibReader.open(journal);
+  }
   if (!app) return;
   app.follow(data.journalUuid, data.spread ?? 0);
 }

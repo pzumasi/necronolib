@@ -53,4 +53,4 @@ ${cards}
 </html>`;
 
 writeFileSync('tools/preview.html', page);
-console.log('tools/preview.html geschrieben,', cards.length, 'Cover-Kombinationen');
+console.log('tools/preview.html geschrieben,', combos.length, 'Cover-Kombinationen');

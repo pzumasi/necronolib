@@ -6,7 +6,11 @@
       "Save": "Save",
       "Reset": "Reset",
       "Saved": "Cover saved for “{journal}”.",
-      "RunesHint": "Without a title: procedural runes"
+      "RunesHint": "Without a title: procedural runes",
+      "SaveFailed": "Saving failed — see console for details.",
+      "Revert": "Revert",
+      "RevertTitle": "Discard unsaved changes (reload saved state)",
+      "ResetTitle": "Reset all fields to defaults (not saved yet)"
     },
     "Field": {
       "Material": "Material",
@@ -109,7 +113,11 @@
       "ShareTitle": "Shared reading: players follow your page turns",
       "SharedOn": "Shared reading enabled for “{journal}”.",
       "SharedOff": "Shared reading ended.",
-      "RunesHint": "Occult runes"
+      "RunesHint": "Occult runes",
+      "Unsupported": "This page type is not shown in the book — please open it in the journal.",
+      "KeeperOnlyOn": "Keeper only — click to reveal to players",
+      "KeeperOnlyOff": "Visible to players — click to make keeper only",
+      "Following": "You are following the keeper's reading"
     },
     "Coc7": {
       "Mythos": "Mythos tome",

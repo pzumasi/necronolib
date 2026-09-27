@@ -6,7 +6,11 @@
       "Save": "Speichern",
       "Reset": "Zurücksetzen",
       "Saved": "Cover für „{journal}“ gespeichert.",
-      "RunesHint": "Ohne Titel: prozedurale Runen"
+      "RunesHint": "Ohne Titel: prozedurale Runen",
+      "SaveFailed": "Speichern fehlgeschlagen — Details in der Konsole.",
+      "Revert": "Verwerfen",
+      "RevertTitle": "Ungespeicherte Änderungen verwerfen (gespeicherten Stand laden)",
+      "ResetTitle": "Alle Felder auf Standardwerte setzen (noch nicht gespeichert)"
     },
     "Field": {
       "Material": "Material",
@@ -109,7 +113,11 @@
       "ShareTitle": "Geteiltes Lesen: Spieler folgen deinem Umblättern",
       "SharedOn": "Geteiltes Lesen für „{journal}“ aktiviert.",
       "SharedOff": "Geteiltes Lesen beendet.",
-      "RunesHint": "Okkulte Runen"
+      "RunesHint": "Okkulte Runen",
+      "Unsupported": "Dieser Seitentyp wird im Buch nicht dargestellt — bitte im Journal öffnen.",
+      "KeeperOnlyOn": "Nur Spielleitung — klicken, um für Spieler freizugeben",
+      "KeeperOnlyOff": "Für Spieler sichtbar — klicken, um nur für die Spielleitung zu zeigen",
+      "Following": "Du folgst dem Vorlesen der Spielleitung"
     },
     "Coc7": {
       "Mythos": "Mythos-Buch",

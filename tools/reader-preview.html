@@ -144,6 +144,9 @@
   max-width: 100%;
 }
 
+/* hidden-Toggle (Titel ↔ Runen, live im Atelier) */
+.nl-book [hidden] { display: none !important; }
+
 /* Titel-lose Bücher: prozedurale Runen */
 .nl-runes {
   font-size: 1.15rem;
@@ -636,6 +639,13 @@ button.active {
   align-self: center;
   max-width: 100%;
   max-height: 100%;
+  /* Höhe an die Bühne binden: sonst wächst der Spread mit langem Inhalt über
+     die Bühne hinaus und wird oben abgeschnitten (Seiten scrollen stattdessen). */
+  height: 100%;
+  min-height: 0;
+  /* necronolib.css (Atelier-Entwurf) setzt .nl-spread auf align-items: center —
+     hier explizit stretch, damit Seiten Bühnenhöhe haben und intern scrollen. */
+  align-items: stretch;
   aspect-ratio: 3 / 2;
   box-shadow: 0 18px 42px rgba(0, 0, 0, 0.55);
   border-radius: 4px;
@@ -780,6 +790,47 @@ button.active {
   margin-bottom: 4px;
 }
 
+/* Seitentitel (Foundry: title.show / title.level; Bild-/Sonderseiten immer) */
+.nl-page-heading {
+  font-family: Georgia, serif;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  margin: 0 0 0.6em;
+  padding-bottom: 0.3em;
+  border-bottom: 1px solid rgba(90, 74, 48, 0.3);
+}
+.nl-page-heading-h1 { font-size: 1.35rem; }
+.nl-page-heading-h2 { font-size: 1.15rem; }
+.nl-page-heading-h3 { font-size: 1rem; }
+
+.nl-page .nl-page-image { margin: 0; text-align: center; }
+.nl-page .nl-page-image figcaption { font-size: 0.8rem; font-style: italic; opacity: 0.75; margin-top: 4px; }
+.nl-page-unsupported { font-style: italic; opacity: 0.6; }
+
+/* GM: SL-only-Umschalter je Seite + Markierung */
+.nl-reader .nl-keeper-toggle {
+  /* sticky: bleibt beim Scrollen langer Seiten sichtbar (.nl-page ist Flex-Spalte) */
+  position: sticky;
+  top: 0;
+  align-self: flex-end;
+  margin: 0 0 -22px 8px;
+  z-index: 1;
+  width: auto;
+  min-width: 26px;
+  height: 22px;
+  line-height: 1;
+  flex: none;
+  padding: 1px 6px;
+  font-size: 0.7rem;
+  opacity: 0.45;
+}
+.nl-reader .nl-keeper-toggle:hover,
+.nl-reader .nl-keeper-toggle.active { opacity: 1; }
+.nl-page.nl-keeper-only {
+  outline: 2px dashed rgba(140, 50, 60, 0.55);
+  outline-offset: -6px;
+}
+
 </style>
 </head>
 <body>
@@ -810,8 +861,9 @@ button.active {
         <div class="nl-spine-hinge"></div>
         <div class="nl-wear"></div>
         <div class="nl-sheen"></div>
-        <div class="nl-title-wrap nl-pos-center">
-          <span class="nl-title nl-font-serif nl-effect-gilt">Cultes des Goules</span>
+        <div class="nl-title-wrap nl-pos-center" data-nl-title-wrap>
+          <span class="nl-title nl-font-serif nl-effect-gilt" data-nl-title >Cultes des Goules</span>
+          <span class="nl-runes" data-nl-runes title="" hidden></span>
         </div>
         <div class="nl-clasp nl-clasp-top"></div>
         <div class="nl-clasp nl-clasp-bottom"></div>
@@ -875,7 +927,14 @@ button.active {
 
   <div class="nl-stage">
     <div class="nl-spread">
-      <div class="nl-page nl-page-right" data-folio="1"><h1>Cultes des Goules</h1><p><em>par le Comte d’Erlette</em></p><h2>Kapitel 1</h2><p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. (1.1)</p><p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. (1.2)</p><p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. (1.3)</p><p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. (1.4)</p></div>
+        <div class="nl-page nl-page-right " data-folio="1" data-page-id="p1">
+          <button type="button" class="nl-keeper-toggle " data-action="toggleKeeperOnly" data-page-id="p1"
+                  title="Für Spieler sichtbar — klicken, um nur für die Spielleitung zu zeigen">
+            <i class="fa-solid fa-eye"></i>
+          </button>
+          
+          <h1>Cultes des Goules</h1><p><em>par le Comte d’Erlette</em></p><h2>Kapitel 1</h2><p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. (1.1)</p><p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. (1.2)</p><p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. (1.3)</p><p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. (1.4)</p>
+        </div>
     </div>
   </div>
 
@@ -931,8 +990,22 @@ button.active {
 
   <div class="nl-stage">
     <div class="nl-spread">
-      <div class="nl-page nl-page-left" data-folio="2"><h2>Kapitel 2</h2><p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. (2.1)</p><p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. (2.2)</p><p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. (2.3)</p><p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. (2.4)</p></div>
-      <div class="nl-page nl-page-right" data-folio="3"><h2>Kapitel 3</h2><p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. (3.1)</p><p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. (3.2)</p><p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. (3.3)</p><p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. (3.4)</p></div>
+        <div class="nl-page nl-page-left " data-folio="2" data-page-id="p2">
+          <button type="button" class="nl-keeper-toggle " data-action="toggleKeeperOnly" data-page-id="p2"
+                  title="Für Spieler sichtbar — klicken, um nur für die Spielleitung zu zeigen">
+            <i class="fa-solid fa-eye"></i>
+          </button>
+          
+          <h2>Kapitel 2</h2><p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. (2.1)</p><p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. (2.2)</p><p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. (2.3)</p><p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. (2.4)</p>
+        </div>
+        <div class="nl-page nl-page-right nl-keeper-only" data-folio="3" data-page-id="p3">
+          <button type="button" class="nl-keeper-toggle active" data-action="toggleKeeperOnly" data-page-id="p3"
+                  title="Nur Spielleitung — klicken, um für Spieler freizugeben">
+            <i class="fa-solid fa-eye-slash"></i>
+          </button>
+          <div class="nl-page-heading nl-page-heading-h2">Kapitel VII (SL)</div>
+          <h2>Kapitel 3</h2><p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. (3.1)</p><p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. (3.2)</p><p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. (3.3)</p><p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. (3.4)</p>
+        </div>
     </div>
   </div>
 

@@ -19,6 +19,7 @@ Bücher und Mythos-Tome in Foundry VTT gestalten und erleben:
 - [x] Phase 2 — Reader (geschlossenes Buch, Doppelseiten, Folios, Socket-Vorlesen)
 - [x] Phase 3 — CoC7-Brücke (Link, Chips, Erstlesung/Nachschlagen)
 - [x] v0.1.0 Release (38 Tests grün) — [Releases](https://github.com/pzumasi/necronolib/releases)
+- [x] Review 27.09.2026 — Bugfixes, Sicherheits-Härtung, Features (siehe `PROJECTPLAN.md` → „Review 2026-09-27“)
 - [ ] Foundry-Host-Spike (Installation + Testwelt)
 
 ## Installation (testbereit)
@@ -28,13 +29,16 @@ nach `<FoundryData>/Data/modules/necronolib/` entpacken (Ordnername exakt `necro
 Foundry komplett neu starten, Modul in der Welt aktivieren.
 
 - Ohne CoC7: Cover + Reader funktionieren systemagnostisch
+- Reader: Pfeiltasten/Bild↑↓ blättern; SL kann je Seite „nur Spielleitung“ umschalten (Auge-Button)
+- Vorlesen: Spieler mit Leserechten bekommen das Buch automatisch geöffnet und folgen dem Umblättern
 - Mit CoC7: zusätzlich Verknüpfungs-Dropdown (Atelier) + Statistik/Aktionen im Reader
 
 ## Entwicklung
 
 ```powershell
-npm test              # 21 Unit-Tests (node --test)
-node tools/preview.mjs # Cover-Matrix als HTML generieren (tools/preview.html)
+npm test              # 51 Unit-Tests (node --test)
+node tools/preview.mjs        # Cover-Matrix als HTML generieren (tools/preview.html)
+node tools/reader-preview.mjs # Reader-Zustände als HTML generieren (tools/reader-preview.html)
 ```
 
 ## Umgebung

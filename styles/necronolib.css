@@ -130,6 +130,9 @@
   max-width: 100%;
 }
 
+/* hidden-Toggle (Titel ↔ Runen, live im Atelier) */
+.nl-book [hidden] { display: none !important; }
+
 /* Titel-lose Bücher: prozedurale Runen */
 .nl-runes {
   font-size: 1.15rem;

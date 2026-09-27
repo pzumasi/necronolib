@@ -3,7 +3,7 @@
  * AppV2-Fenster: Live-Vorschau + Feldeinstellungen, Speichern in flags.necronolib.
  * Verwendet nur verifizierte v14-Idiome: actions/data-action, this.element, this.render().
  */
-import { getBookFlags, setBookFlags, getLinkFlags, setLinkFlags } from './schema.mjs';
+import { getBookFlags, getLinkFlags, saveBook } from './schema.mjs';
 import { isCoC7, listBookItems } from './coc7.mjs';
 import {
   normalizeCover, defaultCover, coverVars, runesFor,
@@ -13,7 +13,7 @@ import { applyCover } from '../src/cover/render.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
-/** Instanzen je Journal (mehrfach öffnen vermeiden). */
+/** Offene Instanzen je Journal (mehrfach öffnen vermeiden; Eintrag fällt beim Schließen weg). */
 const OPEN = new Map();
 
 export class NecronolibAtelier extends HandlebarsApplicationMixin(ApplicationV2) {
@@ -40,7 +40,8 @@ export class NecronolibAtelier extends HandlebarsApplicationMixin(ApplicationV2)
     tag: 'section',
     actions: {
       save: NecronolibAtelier.#onSave,
-      reset: NecronolibAtelier.#onReset
+      reset: NecronolibAtelier.#onReset,
+      revert: NecronolibAtelier.#onRevert
     }
   };
 
@@ -54,32 +55,55 @@ export class NecronolibAtelier extends HandlebarsApplicationMixin(ApplicationV2)
 
   /** Atelier für ein Journal öffnen (Singleton je Journal). */
   static open(journal) {
-    const key = journal?.uuid ?? String(journal?.id);
+    const key = journal?.uuid;
     if (!key) return null;
     let app = OPEN.get(key);
     if (!app) {
       app = new NecronolibAtelier(journal);
       OPEN.set(key, app);
-      app.render(true);
-    } else {
-      app.render(true);
     }
+    app.render({ force: true });
     return app;
+  }
+
+  /** Fenstertitel mit Journalnamen. */
+  get title() {
+    return `${game.i18n.localize(this.options.window.title)}: ${this.#journal.name}`;
+  }
+
+  async _onClose(options) {
+    await super._onClose?.(options);
+    if (OPEN.get(this.#journal.uuid) === this) OPEN.delete(this.#journal.uuid);
+  }
+
+  /** Nach jedem Render (auch dem ersten) Feld-Listener setzen. */
+  async _onRender(context, options) {
+    await super._onRender?.(context, options);
+    this.#wire();
   }
 
   async _prepareContext() {
     const vars = Object.entries(coverVars(this.#cover)).map(([k, v]) => `${k}: ${v}`).join('; ');
-    const showRunes = !this.#cover.title.text;
     const coc7Books = isCoC7(game)
       ? listBookItems(game.items).map(i => ({ uuid: i.uuid, name: i.name, selected: i.uuid === this.#link.coc7BookUuid }))
       : null;
+    // Bestehende Verknüpfung auf ein Actor-Item (nicht in game.items) weiter anzeigen,
+    // sonst würde Speichern sie stillschweigend lösen.
+    const linked = this.#link.coc7BookUuid;
+    if (coc7Books && linked && !coc7Books.some(b => b.uuid === linked)) {
+      let item = null;
+      try { item = fromUuidSync(linked); } catch { /* Compendium/ungültig */ }
+      const name = item ? `${item.name}${item.actor ? ` (${item.actor.name})` : ''}` : linked;
+      coc7Books.unshift({ uuid: linked, name, selected: true });
+    }
     return {
       journal: { id: this.#journal.id, name: this.#journal.name },
       cover: this.#cover,
       vars,
       link: this.#link,
-      runes: showRunes ? runesFor(this.#journal.uuid) : '',
-      runesTitle: showRunes ? game.i18n.localize('NECRONOLIB.Atelier.RunesHint') : '',
+      // Runen immer mitrendern: applyCover schaltet Titel ↔ Runen live um.
+      runes: runesFor(this.#journal.uuid),
+      runesTitle: game.i18n.localize('NECRONOLIB.Atelier.RunesHint'),
       coc7Active: isCoC7(game),
       coc7Books,
       materialOptions: NecronolibAtelier.#options('Material', COVER_MATERIALS),
@@ -93,27 +117,26 @@ export class NecronolibAtelier extends HandlebarsApplicationMixin(ApplicationV2)
     };
   }
 
-  /** Nach jedem Render: Change-Listener auf alle Felder setzen ( öffentl. API, kein privates Framework-Event). */
+  /** Change-/Input-Listener auf alle Felder setzen (öffentl. API, kein privates Framework-Event). */
   #wire() {
     for (const field of this.element.querySelectorAll('[data-nl-field]')) {
-      field.addEventListener('change', () => {
+      // Textfelder live beim Tippen, Selects beim Wechsel.
+      const eventName = field.tagName === 'INPUT' ? 'input' : 'change';
+      field.addEventListener(eventName, () => {
         const name = field.getAttribute('name');
         if (!name) return;
         this.#setField(name, field.value);
         if (field.dataset.nlRerender === '1') {
           // Material-Wechsel: andere Palettenliste + volle Optionen-Kette neu rendern.
-          this.#renderAndWire();
+          this.render();
         } else {
           // Live-Vorschau ohne Re-Render (Fokus/Scroll bleibt).
           applyCover(this.element, this.#cover);
         }
       });
     }
-  }
-
-  async #renderAndWire() {
-    await this.render();
-    this.#wire();
+    // Enter im Titelfeld darf das Formular nicht absenden.
+    this.element.querySelector('form.nl-controls')?.addEventListener('submit', (e) => e.preventDefault());
   }
 
   #setField(name, value) {
@@ -146,13 +169,34 @@ export class NecronolibAtelier extends HandlebarsApplicationMixin(ApplicationV2)
   }
 
   static async #onSave() {
-    await setBookFlags(this.#journal, this.#cover);
-    await setLinkFlags(this.#journal, this.#link);
-    ui.notifications.info(game.i18n.format('NECRONOLIB.Atelier.Saved', { journal: this.#journal.name }));
+    if (!game.user.isGM) return;
+    // Nur auf existierende CoC7-Buch-Items verknüpfen (Welt- oder Actor-Item);
+    // ungültige/handeditierte UUIDs werden verworfen statt gespeichert.
+    const uuid = this.#link.coc7BookUuid;
+    let validLink = !uuid;
+    if (uuid) {
+      try { validLink = (await fromUuid(uuid))?.type === 'book'; } catch { validLink = false; }
+    }
+    try {
+      const saved = await saveBook(this.#journal, this.#cover, validLink ? this.#link : { coc7BookUuid: '' });
+      this.#cover = saved.cover;
+      this.#link = saved.link;
+      ui.notifications.info(game.i18n.format('NECRONOLIB.Atelier.Saved', { journal: this.#journal.name }));
+    } catch (error) {
+      console.error('necronolib | save failed', error);
+      ui.notifications.error(game.i18n.localize('NECRONOLIB.Atelier.SaveFailed'));
+    }
   }
 
   static #onReset() {
     this.#cover = defaultCover();
-    this.#renderAndWire();
+    this.render();
+  }
+
+  /** Verwirft ungespeicherte Änderungen: Zustand aus den Journal-Flags neu laden. */
+  static #onRevert() {
+    this.#cover = getBookFlags(this.#journal);
+    this.#link = getLinkFlags(this.#journal);
+    this.render();
   }
 }

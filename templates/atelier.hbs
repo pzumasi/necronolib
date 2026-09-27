@@ -1,7 +1,7 @@
 {{!-- Necronolib — Atelier lite (Cover-Designer) --}}
 <div class="nl-atelier">
   <section class="nl-preview">
-    {{> "modules/necronolib/templates/partials/book.hbs" cover=cover vars=vars }}
+    {{> "modules/necronolib/templates/partials/book.hbs" cover=cover vars=vars runes=runes runesTitle=runesTitle}}
     <p class="nl-hint">{{localize "NECRONOLIB.Atelier.Hint"}}</p>
   </section>
 
@@ -100,7 +100,8 @@
 
     <div class="nl-buttons flexrow">
       <button type="button" data-action="save"><i class="fa-solid fa-check"></i> {{localize "NECRONOLIB.Atelier.Save"}}</button>
-      <button type="button" data-action="reset"><i class="fa-solid fa-rotate-left"></i> {{localize "NECRONOLIB.Atelier.Reset"}}</button>
+      <button type="button" data-action="revert" title="{{localize 'NECRONOLIB.Atelier.RevertTitle'}}"><i class="fa-solid fa-clock-rotate-left"></i> {{localize "NECRONOLIB.Atelier.Revert"}}</button>
+      <button type="button" data-action="reset" title="{{localize 'NECRONOLIB.Atelier.ResetTitle'}}"><i class="fa-solid fa-rotate-left"></i> {{localize "NECRONOLIB.Atelier.Reset"}}</button>
     </div>
   </form>
 </div>

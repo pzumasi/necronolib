@@ -1,10 +1,22 @@
 {{!-- Necronolib — Reader (geschlossenes Buch → Doppelseiten) --}}
 <div class="nl-reader">
+  {{#*inline "nlPage"}}
+  <div class="nl-page nl-page-{{side}} {{#if page.keeperOnly}}nl-keeper-only{{/if}}" data-folio="{{page.folio}}" data-page-id="{{page.id}}">
+    {{#if isGM}}
+    <button type="button" class="nl-keeper-toggle {{#if page.keeperOnly}}active{{/if}}" data-action="toggleKeeperOnly" data-page-id="{{page.id}}"
+            title="{{#if page.keeperOnly}}{{localize 'NECRONOLIB.Reader.KeeperOnlyOn'}}{{else}}{{localize 'NECRONOLIB.Reader.KeeperOnlyOff'}}{{/if}}">
+      <i class="fa-solid {{#if page.keeperOnly}}fa-eye-slash{{else}}fa-eye{{/if}}"></i>
+    </button>
+    {{/if}}
+    {{#if page.showTitle}}<div class="nl-page-heading nl-page-heading-{{page.titleTag}}">{{page.name}}</div>{{/if}}
+    {{{page.html}}}
+  </div>
+  {{/inline}}
   <header class="nl-reader-bar">
     <span class="nl-reader-title">{{journal.name}}</span>
     <span class="nl-reader-pages">{{label}}</span>
     <span class="nl-spacer"></span>
-    {{#if following}}<span class="nl-following"><i class="fa-solid fa-eye"></i></span>{{/if}}
+    {{#if following}}<span class="nl-following" title="{{localize 'NECRONOLIB.Reader.Following'}}"><i class="fa-solid fa-eye"></i></span>{{/if}}
     {{#if isGM}}
     <button type="button" class="nl-share-btn {{#if sharing}}active{{/if}}" data-action="toggleShare"
             title="{{localize 'NECRONOLIB.Reader.ShareTitle'}}">
@@ -32,10 +44,10 @@
     {{!-- Doppelseite (Spread 0: nur rechte Seite = Titelseite) --}}
     <div class="nl-spread">
       {{#if current.left}}
-      <div class="nl-page nl-page-left" data-folio="{{current.leftNo}}">{{{current.left.text.content}}}</div>
+      {{> nlPage page=current.left side="left" isGM=isGM}}
       {{/if}}
       {{#if current.right}}
-      <div class="nl-page nl-page-right" data-folio="{{current.rightNo}}">{{{current.right.text.content}}}</div>
+      {{> nlPage page=current.right side="right" isGM=isGM}}
       {{/if}}
     </div>
     {{else}}

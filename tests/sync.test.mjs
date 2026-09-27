@@ -27,3 +27,23 @@ test('isReaderEvent verlangt JournalEntry-Prefix (Härtung)', () => {
 test('Socket-Kanal ist stabil', () => {
   assert.equal(SOCKET_SCOPE, 'module.necronolib');
 });
+
+test('isReaderEvent validiert spread und share', () => {
+  const base = { type: 'reader', action: 'goto', journalUuid: 'JournalEntry.abc' };
+  assert.equal(isReaderEvent({ ...base, spread: -1 }), true);
+  assert.equal(isReaderEvent({ ...base, spread: -2 }), false);
+  assert.equal(isReaderEvent({ ...base, spread: '3' }), false);
+  assert.equal(isReaderEvent({ ...base, spread: 1.5 }), false);
+  assert.equal(isReaderEvent({ ...base, spread: Number.NaN }), false);
+  assert.equal(isReaderEvent({ ...base, action: 'share', share: 'yes' }), false);
+});
+
+test('isFromGM akzeptiert nur Events bekannter GM-User', async () => {
+  const { isFromGM } = await import('../scripts/sync.mjs');
+  const users = new Map([['gm1', { isGM: true }], ['pl1', { isGM: false }]]);
+  assert.equal(isFromGM({ by: 'gm1' }, users), true);
+  assert.equal(isFromGM({ by: 'pl1' }, users), false);
+  assert.equal(isFromGM({ by: 'ghost' }, users), false);
+  assert.equal(isFromGM({}, users), false);
+  assert.equal(isFromGM({ by: 'gm1' }, null), false);
+});
